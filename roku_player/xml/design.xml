@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed>
+	<!-- resultLength indicates the total number of results for this feed -->
+	<resultLength>4</resultLength>
+	<!-- endIndix  indicates the number of results for this *paged* section of the feed -->
+	<endIndex>4</endIndex>
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/JeffHan.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/JeffHan.jpg">
+		<title>Jeff Han demos his breakthrough touchscreen</title>
+		<contentId>10061</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/JeffHan_2006_480.mp4</streamUrl>
+		</media>
+		<synopsis>After years of research on touch-driven computer displays, Jeff Han has created a simple, multi-touch, multi-user screen interface that just might herald the end of the point-and-click era.</synopsis>
+		<genres>Design</genres>
+		<runtime>531</runtime>
+	</item>	
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/DavidKelley.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/DavidKelley.jpg">
+		<title>David Kelley on human-centered design</title>
+		<contentId>10062</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/DavidKelley_2002_480.mp4</streamUrl>
+		</media>
+		<synopsis>IDEO’s David Kelley says that product design has become much less about the hardware and more about the user experience. He shows video of this new, broader approach, including footage from the Prada store in New York.</synopsis>
+		<genres>Design</genres>
+		<runtime>1024</runtime>
+	</item>
+        <item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/YvesBehar.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/YvesBehar.jpg">
+                <title>Yves Behar on designing objects that tell stories</title>
+                <contentId>10063</contentId>
+                <contentType>Talk</contentType>
+                <contentQuality>SD</contentQuality>
+                <media>
+                        <streamFormat>mp4</streamFormat>
+                        <streamQuality>SD</streamQuality>
+                        <streamBitrate>1500</streamBitrate>
+                        <streamUrl>http://video.ted.com/talks/podcast/YvesBehar_2008_480.mp4</streamUrl>
+                </media>                
+		<synopsis>Designer Yves Behar digs up his creative roots to discuss some of the iconic objects he's created (the Leaf lamp, the Jawbone headset). Then he turns to the witty, surprising, elegant objects he's working on now -- including the '$100 laptop.'</synopsis>
+                <genres>Design</genres>
+                <runtime>1066</runtime>
+        </item>
+        <item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/SamMartin.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/SamMartin.jpg">
+                <title>Sam Martin: The quirky world of 'manspaces'</title>
+                <contentId>10064</contentId>
+                <contentType>Talk</contentType>
+                <contentQuality>SD</contentQuality>
+                <media>
+                        <streamFormat>mp4</streamFormat>
+                        <streamQuality>SD</streamQuality>
+                        <streamBitrate>1500</streamBitrate>
+                        <streamUrl>http://video.ted.com/talks/podcast/SamMartin_2009G_480.mp4</streamUrl>
+                </media>                
+		<synopsis>Author Sam Martin shares photos of a quirky world hobby that's trending with the XY set: the 'manspace.' (They're custom-built hangouts where a man can claim a bit of his own territory to work, relax, be himself.) Grab a cold one and enjoy.</synopsis>
+                <genres>Design</genres>
+                <runtime>267</runtime>
+        </item>
+</feed>

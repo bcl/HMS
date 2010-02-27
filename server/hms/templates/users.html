@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Users - Home Media Server{% end %}
+
+{% block body %}
+<div id="Home">
+<fieldset>
+<legend>Add New User</legend>
+<form action="{{ request.path }}add" method="post" id="userForm">
+    <div class="form-input">
+    <label for="username">{{ _("Name") }}</label>
+    <input type="text" name="username" id="username"/>
+    </div>
+    <div class="form-input">
+    <label for="password">{{ _("Password") }}</label>
+    <input type="password" name="password" id="password" />
+    </div>
+    
+    <div class="form-input">
+    <label for="password2">{{ _("Confirm") }}</label>
+    <input type="password" name="password2" id="password2" />
+    </div>
+    
+    <div class="form-input">
+    <label for="email">{{ _("email") }}</label>
+    <input type="text" name="email" id="email" />
+    </div>
+    
+    <div class="submit">
+    <input type="submit" value="{{ _("Add User") }}"/>
+    </div>
+    {{ xsrf_form_html() }}
+</form>
+</fieldset>
+
+{% for user in users %}
+  <li><img src="{{ request.path }}image/{{ user[0]}}" />
+        {{ escape(user[1]) }} - {{ user[2] }} 
+		<a href="{{ request.path }}delete/{{ user[0] }}">Delete</a>
+		<a href="{{ request.path }}edit/{{ user[0] }}">Edit</a>
+		<form enctype="multipart/form-data" action="{{ request.path }}image/{{ user[0] }}" method="POST">
+        Image: <input name="imagefile" type="file" />
+        <input type="submit" value="Upload" />
+        {{ xsrf_form_html() }}
+        </form>
+  </li>
+{% end %}
+</div>
+
+
+{% end %}

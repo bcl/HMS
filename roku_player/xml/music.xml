@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed>
+	<!-- resultLength indicates the total number of results for this feed -->
+	<resultLength>4</resultLength>
+	<!-- endIndix  indicates the number of results for this *paged* section of the feed -->
+	<endIndex>4</endIndex>
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/CameronCarpenter.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/CameronCarpenter.jpg">
+		<title>Cameron Carpenter's dizzying improv on the organ</title>
+		<contentId>10031</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/CameronCarpenter_2008P_480.mp4</streamUrl>
+		</media>
+		<synopsis>At the 2008 EG conference, revolutionary organist Cameron Carpenter performs a classic piece of organ repertory -- and then cuts loose in an incendiary improv. Young organist Eric Fricke closes the set.</synopsis>
+		<genres>Music</genres>
+		<runtime>1790</runtime>
+	</item>	
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/Naturally7.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/Naturally7.jpg">
+		<title>Naturally 7 beatboxes a whole band</title>
+		<contentId>10032</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/Naturally7FLYBABY_2009_480.mp4</streamUrl>
+		</media>
+		<synopsis>One-of-a-kind R and B group Naturally 7 beatboxes an orchestra's worth of instruments to groove through their smooth single, 'Fly Baby.'</synopsis>
+		<genres>Music</genres>
+		<runtime>239</runtime>
+	</item>
+        <item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/ImogenHeap.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/ImogenHeap.jpg">
+                <title>Imogen Heap plays 'Wait It Out'</title>
+                <contentId>10033</contentId>
+                <contentType>Talk</contentType>
+                <contentQuality>SD</contentQuality>
+                <media>
+                        <streamFormat>mp4</streamFormat>
+                        <streamQuality>SD</streamQuality>
+                        <streamBitrate>1500</streamBitrate>
+                        <streamUrl>http://video.ted.com/talks/podcast/ImogenHeap_WaitItOut_2009G_480.mp4</streamUrl>
+                </media>                
+		<synopsis>Imogen Heap's aching voice and spectral electronics infuse countless films and iPods with bone-chilling atmospherics.</synopsis>
+                <genres>Music</genres>
+                <runtime>238</runtime>
+        </item>
+        <item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/RaulMidon.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/RaulMidon.jpg">
+                <title>Raul Midon plays 'Tembererana'</title>
+                <contentId>10034</contentId>
+                <contentType>Talk</contentType>
+                <contentQuality>SD</contentQuality>
+                <media>
+                        <streamFormat>mp4</streamFormat>
+                        <streamQuality>SD</streamQuality>
+                        <streamBitrate>1500</streamBitrate>
+                        <streamUrl>http://video.ted.com/talks/podcast/RaulMidonANSWERS_2007_480.mp4</streamUrl>
+                </media>                
+		<synopsis>Singer/guitarist Raul Midon performs 'All the Answers' in a world premiere at TED2007, followed by the sprightly 'Tembererana.'</synopsis>
+                <genres>Music</genres>
+                <runtime>643</runtime>
+        </item>
+</feed>

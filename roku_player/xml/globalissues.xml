@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed>
+	<!-- resultLength indicates the total number of results for this feed -->
+	<resultLength>4</resultLength>
+	<!-- endIndix  indicates the number of results for this *paged* section of the feed -->
+	<endIndex>4</endIndex>
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/AlGore.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/AlGore.jpg">
+		<title>Al Gore warns on latest climate trends</title>
+		<contentId>10011</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/AlGore_2009_480.mp4</streamUrl>
+		</media>
+		<synopsis>At TED2009, Al Gore presents updated slides from around the globe to make the case that worrying climate trends are even worse than scientists predicted, and to make clear his stance on "clean coal."</synopsis>
+		<genres>Global Issues</genres>
+		<runtime>468</runtime>
+	</item>	
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/RobHopkins.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/RobHopkins.jpg">
+		<title>Rob Hopkins: Transition to a world without oil</title>
+		<contentId>10012</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/RobHopkins_2009G_480.mp4</streamUrl>
+		</media>
+		<synopsis>Rob Hopkins reminds us that the oil our world depends on is steadily running out. He proposes a unique solution to this problem -- the Transition response, where we prepare ourselves for life without oil and sacrifice our luxuries to build systems and communities that are completely independent of fossil fuels.</synopsis>
+		<genres>Global Issues</genres>
+		<runtime>1000</runtime>
+	</item>
+        <item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/JuanEnriquez.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/JuanEnriquez.jpg">
+                <title>Juan Enriquez wants to grow energy</title>
+                <contentId>10013</contentId>
+                <contentType>Talk</contentType>
+                <contentQuality>SD</contentQuality>
+                <media>
+                        <streamFormat>mp4</streamFormat>
+                        <streamQuality>SD</streamQuality>
+                        <streamBitrate>1500</streamBitrate>
+                        <streamUrl>http://video.ted.com/talks/podcast/JuanEnriquez_2007S_480.mp4</streamUrl>
+                </media>                
+		<synopsis>Juan Enriquez challenges our definition of bioenergy. Oil, coal, gas and other hydrocarbons are not chemical but biological products, based on plant matter -- and thus, growable. Our whole approach to fuel, he argues, needs to change.</synopsis>
+                <genres>Global Issues</genres>
+                <runtime>1088</runtime>
+        </item>
+        <item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/RachelPike.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/RachelPike.jpg">
+                <title>Rachel Pike: The science behind a climate headline</title>
+                <contentId>10014</contentId>
+                <contentType>Talk</contentType>
+                <contentQuality>SD</contentQuality>
+                <media>
+                        <streamFormat>mp4</streamFormat>
+                        <streamQuality>SD</streamQuality>
+                        <streamBitrate>1500</streamBitrate>
+                        <streamUrl>http://video.ted.com/talks/podcast/RachelPike_2009G_480.mp4</streamUrl>
+                </media>                
+		<synopsis>In 4 minutes, atmospheric chemist Rachel Pike provides a glimpse of the massive scientific effort behind the bold headlines on climate change, with her team -- one of thousands who contributed -- taking a risky flight over the rainforest in pursuit of data on a key molecule.</synopsis>
+                <genres>Global Issues</genres>
+                <runtime>254</runtime>
+        </item>
+</feed>

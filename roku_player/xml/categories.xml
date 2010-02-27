@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<categories>
+
+	  <!-- banner_ad: optional element which displays an at the top level category screen -->
+	  <banner_ad sd_img="http://rokudev.roku.com/rokudev/examples/videoplayer/images/missing.png" hd_img="http://rokudev.roku.com/rokudev/examples/videoplayer/images/missing.png"/>
+	  
+	<category title="Technology" description="TED Talks on Technology" sd_img="http://rokudev.roku.com/rokudev/examples/videoplayer/images/TED_Technology.png" hd_img="http://rokudev.roku.com/rokudev/examples/videoplayer/images/TED_Technology.png">
+		<categoryLeaf title="The Mind" description="" feed="http://rokudev.roku.com/rokudev/examples/videoplayer/xml/themind.xml"/>
+		<categoryLeaf title="Global Issues" description="" feed="http://rokudev.roku.com/rokudev/examples/videoplayer/xml/globalissues.xml" />
+	</category>
+
+	<category title="Entertainment" description="TED Talks on Entertainment" sd_img="http://rokudev.roku.com/rokudev/examples/videoplayer/images/TED_Entertainment.png" hd_img="http://rokudev.roku.com/rokudev/examples/videoplayer/images/TED_Entertainment.png">
+		<categoryLeaf title="Music" description="" feed="http://rokudev.roku.com/rokudev/examples/videoplayer/xml/music.xml" />
+		<categoryLeaf title="Inspiration" description="" feed="http://rokudev.roku.com/rokudev/examples/videoplayer/xml/inspiration.xml" />
+	</category>
+
+	<category title="Design" description="TED Talks on Design" sd_img="http://rokudev.roku.com/rokudev/examples/videoplayer/images/TED_Design.png" hd_img="http://rokudev.roku.com/rokudev/examples/videoplayer/images/TED_Design.png">
+		<categoryLeaf title="Creativity" description="" feed="http://rokudev.roku.com/rokudev/examples/videoplayer/xml/creativity.xml"/>
+		<categoryLeaf title="Design" description="" feed="http://rokudev.roku.com/rokudev/examples/videoplayer/xml/design.xml" />
+	</category>
+
+ </categories>

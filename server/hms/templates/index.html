@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Home Media Server{% end %}
+
+{% block body %}
+
+<div id="user_lists">
+{% for list in lists %}
+    <div class="list_line"><a href="/media/list/{{ user_id }}/{{ list["id"] }}">{{ list["name"] }}</a></div>
+{% end %}
+
+</div>
+
+{% end %}

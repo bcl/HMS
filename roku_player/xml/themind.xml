@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed>
+	<!-- resultLength indicates the total number of results for this feed -->
+	<resultLength>4</resultLength>
+	<!-- endIndix  indicates the number of results for this *paged* section of the feed -->
+	<endIndex>4</endIndex>
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/JimFallon.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/JimFallon.jpg">
+		<title>Jim Fallon: Exploring the mind of a killer</title>
+		<contentId>10001</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/JimFallon_2009_480.mp4</streamUrl>
+		</media>
+		<synopsis>Psychopathic killers are the basis for some must-watch TV, but what really makes them tick? Neuroscientist Jim Fallon talks about brain scans and genetic analysis that may uncover the rotten wiring in the nature (and nurture) of murderers. In a too-strange-for-fiction twist, he shares a fascinating family history that makes his work chillingly personal.</synopsis>
+		<genres>Clip</genres>
+		<runtime>1260</runtime>
+	</item>	
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/DanGilbert.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/DanGilbert.jpg">
+		<title>Dan Gilbert asks, Why are we happy?</title>
+		<contentId>10002</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/DanGilbert_2004_480.mp4</streamUrl>
+		</media>
+		<synopsis>Harvard psychologist Dan Gilbert says our beliefs about what will make us happy are often wrong -- a premise he supports with intriguing research, and explains in his accessible and unexpectedly funny book, Stumbling on Happiness.</synopsis>
+		<genres>Technology</genres>
+		<runtime>1280</runtime>
+	</item>	
+        <item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/VSRamachandran.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/VSRamachandran.jpg">
+		<title>VS Ramachandran on your mind</title>
+                <contentId>10003</contentId>
+                <contentType>Talk</contentType>
+                <contentQuality>SD</contentQuality>
+                <media>
+                        <streamFormat>mp4</streamFormat>
+                        <streamQuality>SD</streamQuality>
+                        <streamBitrate>1500</streamBitrate>
+                        <streamUrl>http://video.ted.com/talks/podcast/VilayanurRamachandran_2007_480.mp4</streamUrl>
+                </media>
+                <synopsis>Vilayanur Ramachandran tells us what brain damage can reveal about the connection between celebral tissue and the mind, using three startling delusions as examples.</synopsis>
+                <genres>Technology</genres>
+                <runtime>1418</runtime>
+        </item>
+</feed>

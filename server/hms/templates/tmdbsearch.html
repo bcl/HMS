@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Search TMDB - Home Media Server{% end %}
+
+{% block head %}
+<link type="text/css" href="/css/mediaedit.css" rel="Stylesheet" />
+{% end %}
+
+{% block jquery %}
+{% end %}
+
+{% block body %}
+<form action="/tmdb/search/{{ media_id }}" method="post" class="ui-dialog" id="searchForm">
+<fieldset id="search_themoviedb">
+    <legend>Search themoviedb.org</legend>
+    <div class="form-input"><label for="searchTitle">Title</label>
+        <input type="text" size="40" name="searchTitle">
+    </div>
+    <input type="submit" value="{{ _("Search") }}"/>
+    
+    {{ xsrf_form_html() }}
+</form>
+</fieldset> 
+
+{% for movie in movies %}
+<form action="/tmdb/update/{{ media_id }}/{{ movie["id"] }}" method="post">
+    <fieldset>
+        <legend>{{ movie["name"] }}</legend>
+        <img src="{{ movie["posters"]["cover"]["url"] }}" />
+        <input type="submit" value="{{ _("Select") }}"/>
+        {{ xsrf_form_html() }}
+    </fieldset>
+</form>
+{% end %}
+{% end %}
+

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed>
+	<!-- resultLength indicates the total number of results for this feed -->
+	<resultLength>3</resultLength>
+	<!-- endIndex  indicates the number of results for this *paged* section of the feed -->
+	<endIndex>3</endIndex>
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/BenjaminZander.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/BenjaminZander.jpg">
+		<title>Benjamin Zander on music and passion</title>
+		<contentId>10041</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/BenjaminZander_2008_480.mp4</streamUrl>
+		</media>
+		<synopsis>Benjamin Zander has two infectious passions: classical music, and helping us all realize our untapped love for it -- and by extension, our untapped love for all new possibilities, new experiences, new connections.</synopsis>
+		<genres>Inspiration</genres>
+		<runtime>1246</runtime>
+	</item>	
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/CynthiaSchneider.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/CynthiaSchneider.jpg">
+		<title>Cynthia Schneider: The surprising spread of "Idol" TV</title>
+		<contentId>10042</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/CynthiaSchneider_2009G_480.mp4</streamUrl>
+		</media>
+		<synopsis>Cynthia Schneider looks at two international 'American Idol'-style shows -- one in Afghanistan, and one in the United Arab Emirates -- and shows the surprising effect that these reality-TV competitions are creating in their societies.</synopsis>
+		<genres>Inspiration</genres>
+		<runtime>338</runtime>
+	</item>
+        <item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/JulianTreasure.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/JulianTreasure.jpg">
+                <title>Julian Treasure: The 4 ways sound affects us</title>
+                <contentId>10043</contentId>
+                <contentType>Talk</contentType>
+                <contentQuality>SD</contentQuality>
+                <media>
+                        <streamFormat>mp4</streamFormat>
+                        <streamQuality>SD</streamQuality>
+                        <streamBitrate>1500</streamBitrate>
+                        <streamUrl>http://video.ted.com/talks/podcast/JulianTreasure_2009G_480.mp4</streamUrl>
+                </media>                
+		<synopsis>Playing sound effects both pleasant and awful, Julian Treasure shows how sound affects us in four significant ways. Listen carefully for a shocking fact about noisy open-plan offices.</synopsis>
+                <genres>Inspiration</genres>
+                <runtime>347</runtime>
+        </item>
+</feed>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed>
+	<!-- resultLength indicates the total number of results for this feed -->
+	<resultLength>3</resultLength>
+	<!-- endIndix  indicates the number of results for this *paged* section of the feed -->
+	<endIndex>3</endIndex>
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/ElizabethGilbert.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/ElizabethGilbert.jpg">
+		<title>Elizabeth Gilbert on nurturing creativity</title>
+		<contentId>10051</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/ElizabethGilbert_2009_480.mp4</streamUrl>
+		</media>
+		<synopsis>Elizabeth Gilbert muses on the impossible things we expect from artists and geniuses -- and shares the radical idea that, instead of the rare person 'being' a genius, all of us 'have' a genius. It's a funny, personal and surprisingly moving talk.</synopsis>
+		<genres>Creativity</genres>
+		<runtime>1172</runtime>
+	</item>	
+	<item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/SethGodin.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/SethGodin.jpg">
+		<title>Seth Godin on standing out</title>
+		<contentId>10052</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl>http://video.ted.com/talks/podcast/SethGodin_2003_480.mp4</streamUrl>
+		</media>
+		<synopsis>In a world of too many options and too little time, our obvious choice is to just ignore the ordinary stuff. Marketing guru Seth Godin spells out why, when it comes to getting our attention, bad or bizarre ideas are more successful than boring ones.</synopsis>
+		<genres>Creativity</genres>
+		<runtime>1024</runtime>
+        </item>
+        <item sdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/TimBrown.jpg" hdImg="http://rokudev.roku.com/rokudev/examples/videoplayer/images/TimBrown.jpg">
+                <title>Tim Brown urges designers to think big</title>
+                <contentId>10053</contentId>
+                <contentType>Talk</contentType>
+                <contentQuality>SD</contentQuality>
+                <media>
+                        <streamFormat>mp4</streamFormat>
+                        <streamQuality>SD</streamQuality>
+                        <streamBitrate>1500</streamBitrate>
+                        <streamUrl>http://video.ted.com/talks/podcast/TimBrown_2009G_480.mp4</streamUrl>
+                </media>                
+		<synopsis>Tim Brown says the design profession is preoccupied with creating nifty, fashionable objects -- even as pressing questions like clean water access show it has a bigger role to play. He calls for a shift to local, collaborative, participatory 'design thinking.'</synopsis>
+                <genres>Creativity</genres>
+                <runtime>1010</runtime>
+        </item>
+</feed>

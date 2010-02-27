@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Home Media Server{% end %}
+
+{% block body %}
+<form action="{{ request.path }}" method="post" id="loginForm">
+    <div class="form-input"><label for="username">{{ _("Username") }}</label>
+    <input type="text" name="username" id="username"/>
+    </div>
+    <div class="form-input">
+    <label for="password">{{ _("Password") }}</label>
+    <input type="password" name="password" id="password"/>
+    </div>
+
+    <div class="submit">
+    <input type="submit" value="{{ _("Sign in") }}"/>
+    </div>
+    {{ xsrf_form_html() }}
+</form>
+{% end %}

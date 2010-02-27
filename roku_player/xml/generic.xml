@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<feed>
+	<!-- resultLength indicates the total number of results for this feed -->
+	<resultLength>3</resultLength>
+	<!-- endIndix  indicates the number of results for this *paged* section of the feed -->
+	<endIndex>3</endIndex>
+	<item sdImg="http://www.rokudev.com/rokudev/examples/videoplayer/images/" hdImg="http://www.rokudev.com/rokudev/examples/videoplayer/images/">
+		<title></title>
+		<contentId>10001</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl></streamUrl>
+		</media>
+		<synopsis></synopsis>
+		<genres>Clip</genres>
+		<runtime>1260</runtime>
+	</item>	
+	<item sdImg="http://www.rokudev.com/rokudev/examples/videoplayer/images/" hdImg="http://www.rokudev.com/rokudev/examples/videoplayer/images/">
+		<title></title>
+		<contentId>10002</contentId>
+		<contentType>Talk</contentType>
+		<contentQuality>SD</contentQuality>
+		<media>
+			<streamFormat>mp4</streamFormat>
+			<streamQuality>SD</streamQuality>
+			<streamBitrate>1500</streamBitrate>
+			<streamUrl></streamUrl>
+		</media>
+		<synopsis></synopsis>
+		<genres>Clip</genres>
+		<runtime>1280</runtime>
+	</item>
+        <item sdImg="http://www.rokudev.com/rokudev/examples/videoplayer/images/" hdImg="http://www.rokudev.com/rokudev/examples/videoplayer/images/">
+                <title></title>
+                <contentId>10002</contentId>
+                <contentType>Talk</contentType>
+                <contentQuality>SD</contentQuality>
+                <media>
+                        <streamFormat>mp4</streamFormat>
+                        <streamQuality>SD</streamQuality>
+                        <streamBitrate>1500</streamBitrate>
+                        <streamUrl></streamUrl>
+                </media>                
+		<synopsis></synopsis>
+                <genres>Clip</genres>
+                <runtime>1280</runtime>
+        </item>
+</feed>
