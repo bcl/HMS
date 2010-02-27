@@ -1298,6 +1298,9 @@ class MainHandler(BaseHandler):
 
 def main():
     tornado.options.parse_command_line()
+
+    print "Starting Home Media Server"
+    print "Listening on port %s" % (options.port)
     
     # Setup the database
     if not os.path.exists(options.database):
