@@ -1,0 +1,44 @@
+Home Media Server
+by Brian C. Lane <bcl@brianlane.com>
+
+
+1. Server Installation
+  == REQUIREMENTS ==
+
+  a. Python
+  b. virtualenv
+  c. pip
+  d. libcurl-devel
+  e. "Development Tools"
+  f. mp4info from the libmp4v2 package
+
+  == virtualenv setup ==
+  Setup the virtual python environment:
+      pip -E pyvirt install -r hms/tornado.pip 
+      . ./pyvirt/bin/activate
+      cd hms
+      ./hms.py
+
+  == Configuration ==
+  The first thing to do is add the directories where your media files are 
+  stored. Log into the system and select 'Media Sources'. Give it a name and
+  a local path (only local directory is supported at this time).
+  Click 'Add Source'
+
+  Delete and Edit currently don't work
+
+  Click on 'Import New Media' and it will scan the directory for supported
+  media files. For movies it will run mp4info on it to get the details of
+  the video format.
+
+2. Client Installation
+
+
+
+
+3. Contribute
+
+
+
+
+
