@@ -665,7 +665,54 @@ class LogoutHandler(BaseHandler):
     def get(self):
         self.set_secure_cookie("user", "")
         self.redirect("/login")
+
+class SourceEditHandler(BaseHandler):
+    """
+    Handle Editing the Media sources
+    """
+    @tornado.web.authenticated
+    def get(self, id):
+        if self.current_user != 'admin':
+            self.redirect("/")
+
+        conn = sqlite3.connect(options.database)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("select * from source where id=?", (id,))
+	row = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        name = tornado.escape.xhtml_escape(self.current_user)
+        self.render(os.path.join("templates","sourceedit.html"), 
+                    source=row,
+                    name=name)
+ 
+    @tornado.web.authenticated
+    def post(self, id):
+        if self.current_user != 'admin':
+            self.redirect("/")
+            return
+
+        sql_set = []
+        sql_args = []
+        for field in self.request.arguments:
+            if field[0] == "_":
+                continue
+            sql_set.append("%s=?" % (field))
+            sql_args.append(self.get_argument(field))
+
+        sql_args.append(int(id))
+        sql = "update source set %s where id=?" % ",".join(sql_set)
         
+        conn = sqlite3.connect(options.database)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute(sql, sql_args)
+        conn.commit()
+       
+	self.redirect("/source/") 
+  
 
 class SourceHandler(BaseHandler):
     """
@@ -1320,6 +1367,7 @@ def main():
         (r"/", MainHandler),
         (r"/login", LoginHandler),
         (r"/logout", LogoutHandler),
+	(r"/source/edit/(.*)", SourceEditHandler),
         (r"/source/(.*)", SourceHandler),
         (r"/media/list/(.*)/(.*)", MediaListHandler),
         (r"/media/edit/(.*)", MediaEditHandler),

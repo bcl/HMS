@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Media Source{% end %}
+
+{% block body %}
+<div id="Source">
+<fieldset>
+<legend>Edit Media Source</legend>
+<form action="{{ request.path }}" method="post" id="sourceForm">
+    <div class="form-input">
+    <label for="name">{{ _("Source Name") }}</label>
+    <input type="text" name="name" id="name" size="40" value="{{ source["name"] }}"/>
+    </div>
+    
+    <div class="form-input">
+    <label for="type">{{ _("Type") }}</label>
+    <select name="type" id="type">
+    <option value="local" {% if source["type"] == "local" %}selected{% end %}>Local Directory</option>
+    <option value="remote" {% if source["type"] == "remote" %}selected{% end %}>Remote URL</option>
+    </select>
+    </div>
+    
+    <div class="form-input">
+    <label for="path">{{ _("Path") }}</label>
+    <input type="text" name="path" id="path" size="40" value="{{ source["path"] }}"/>
+    </div>
+    
+    <div class="submit">
+    <input type="submit" value="{{ _("Update") }}"/>
+    </div>
+    {{ xsrf_form_html() }}
+</form>
+</fieldset>
+
+</div>
+
+{% end %}
