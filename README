@@ -15,6 +15,7 @@ by Brian C. Lane <bcl@brianlane.com>
   == virtualenv setup ==
   Setup the virtual python environment:
       pip -E pyvirt install -r hms/tornado.pip 
+      pip -E install pil
       . ./pyvirt/bin/activate
       cd hms
       ./hms.py

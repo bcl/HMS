@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Users - Home Media Server{% end %}
+{% block title %}Edit User - Home Media Server{% end %}
 
 {% block body %}
 <div id="Home">
 <fieldset>
-<legend>Add New User</legend>
-<form action="{{ request.path }}add" method="post" id="userForm" enctype="multipart/form-data">
+<legend>Edit User</legend>
+<form action="{{ request.path }}" method="post" id="userForm" enctype="multipart/form-data">
     <div class="form-input">
     <label for="username">{{ _("Name") }}</label>
-    <input type="text" name="username" id="username"/>
+    <input type="text" name="username" id="username" value="{{ user["username"] }}" {% if user["username"] == "admin" %}disabled{% end %}/>
     </div>
     <div class="form-input">
     <label for="password">{{ _("Password") }}</label>
@@ -23,28 +23,20 @@
     
     <div class="form-input">
     <label for="email">{{ _("email") }}</label>
-    <input type="text" name="email" id="email" />
+    <input type="text" name="email" id="email" value="{{ user["email"] or ""}}"/>
     </div>
-
+    
     <div class="form-input">
-    <label for="imagefile">{{ _("Image") }}</label>
+    <label for "imagefile">{{ _("Image") }}</label>
     <input name="imagefile" id="imagefile" type="file" />
     </div>
-
+    
     <div class="submit">
-    <input type="submit" value="{{ _("Add User") }}"/>
+    <input type="submit" value="{{ _("Update") }}"/>
     </div>
     {{ xsrf_form_html() }}
 </form>
 </fieldset>
-
-{% for user in users %}
-  <li><img src="{{ request.path }}image/{{ user[0]}}" />
-        {{ escape(user[1]) }} - {{ user[2] }} 
-		<a href="{{ request.path }}delete/{{ user[0] }}">Delete</a>
-		<a href="{{ request.path }}edit/{{ user[0] }}">Edit</a>
-  </li>
-{% end %}
 </div>
 
 

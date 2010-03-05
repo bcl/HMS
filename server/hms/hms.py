@@ -916,6 +916,103 @@ class MediaHandler(BaseHandler):
         pass
 
 
+class UserEditHandler(BaseHandler):
+    @tornado.web.authenticated
+    def get(self, id):
+        """
+        admin can update anyone, users can only edit their own
+        """
+        conn = sqlite3.connect(options.database)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+            
+        cur.execute("select * from user where username=?", (self.current_user,))
+        row = cur.fetchone()
+        if row:
+            user_id = int(row['id'])
+        else:
+            print "failed to find user id, DO SOMETHING HERE"
+            return
+            
+        if self.current_user != 'admin' and user_id != id:
+            self.redirect("/user/")
+            return
+    
+        cur.execute("select * from user where id=?", (id,))
+        row = cur.fetchone()
+        if not row:
+            self.redirect("/user/")
+            return
+
+        name = tornado.escape.xhtml_escape(self.current_user)
+        self.render(os.path.join("templates","useredit.html"), user=row, name=name)
+
+    @tornado.web.authenticated
+    def post(self, id):
+        """
+        admin can update anyone, users can only edit their own
+        """
+        conn = sqlite3.connect(options.database)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+            
+        cur.execute("select * from user where username=?", (self.current_user,))
+        row = cur.fetchone()
+        if row:
+            user_id = int(row['id'])
+        else:
+            print "failed to find user id, DO SOMETHING HERE"
+            return
+            
+        if self.current_user != 'admin' and user_id != id:
+            self.redirect("/user/")
+            return
+
+        # Need a good way to handle mismatched passwords
+        if self.request.arguments["password"] != self.request.arguments["password2"]:
+            self.redirect("/user/edit/%s" % (id))
+            return
+
+        # These are fields that could be blank, and not returned by the POST
+        blank_fields = [ "email" ]
+
+        sql_set = []
+        sql_args = []
+        for field in self.request.arguments:
+            if field[0] == "_" or field in ["imagefile", "password2"]:
+                continue
+
+            # If password field is blank, skip updating it
+            if field == "password" and not self.get_argument(field):
+                continue
+            sql_set.append("%s=?" % (field))
+            sql_args.append(self.get_argument(field))
+            if field in blank_fields:
+                blank_fields.remove(field)
+        for field in blank_fields:
+            sql_set.append("%s=?" % (field))
+            sql_args.append("")
+
+        sql_args.append(int(id))
+        sql = "update user set %s where id=?" % ",".join(sql_set)
+        
+        cur.execute(sql, sql_args)
+        conn.commit()
+        
+        # Update the image if it was included
+        try:
+            imagefile = self.request.files["imagefile"][0]
+            params = (  sqlite3.Binary(imagefile["body"]), 
+                        imagefile["content_type"],
+                        imagefile["filename"],
+                        int(id))
+            cur.execute("update user set avatar_image=?,content_type=?,filename=? where id=?", params)
+            conn.commit()
+        except:
+            print traceback.format_exc()
+        self.redirect("/user/")
+
+
 class UserHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self, method=None):
@@ -968,16 +1065,25 @@ class UserHandler(BaseHandler):
             conn = sqlite3.connect(options.database)
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
-            try:
-                sql  = "insert into user(username, password, email) "
-                sql += "values(?,?,?)"
-                cur.execute(sql, params)
+            sql  = "insert into user(username, password, email) "
+            sql += "values(?,?,?)"
+            cur.execute(sql, params)
+            conn.commit()
+            id = cur.lastrowid
 
-                # @TODO check for errors and report to user
+            try:
+                imagefile = self.request.files["imagefile"][0]
+                params = (  sqlite3.Binary(imagefile["body"]), 
+                            imagefile["content_type"],
+                            imagefile["filename"],
+                            int(id))
+                cur.execute("update user set avatar_image=?,content_type=?,filename=? where id=?", params)
                 conn.commit()
-            finally:
-                cur.close()
-                conn.close()
+            except:
+                print traceback.format_exc()
+
+            cur.close()
+            conn.close()
         self.redirect("/user/")
         return
 
@@ -1021,11 +1127,6 @@ class UserImageHandler(BaseHandler):
         
         try:
             imagefile = self.request.files["imagefile"][0]
-            from hashlib import sha1
-            cksum = sha1()
-            cksum.update(imagefile["body"])
-            print cksum.hexdigest()
-
             params = (  sqlite3.Binary(imagefile["body"]), 
                         imagefile["content_type"],
                         imagefile["filename"],
@@ -1367,7 +1468,7 @@ def main():
         (r"/", MainHandler),
         (r"/login", LoginHandler),
         (r"/logout", LogoutHandler),
-	(r"/source/edit/(.*)", SourceEditHandler),
+        (r"/source/edit/(.*)", SourceEditHandler),
         (r"/source/(.*)", SourceHandler),
         (r"/media/list/(.*)/(.*)", MediaListHandler),
         (r"/media/edit/(.*)", MediaEditHandler),
@@ -1379,6 +1480,7 @@ def main():
         (r"/tmdb/update/(.*)/(.*)", UpdateTMDBHandler),
         (r"/list/(.*)/(.*)", ListHandler),
         (r"/user/image/(.*)", UserImageHandler),
+        (r"/user/edit/(.*)", UserEditHandler),
         (r"/user/(.*)", UserHandler),
         (r"/xml/users", XMLUsersHandler),
         (r"/xml/list/(.*)/(.*)", XMLListHandler),
