@@ -537,7 +537,7 @@ class UpdateTMDBHandler(BaseHandler):
         genres = []
         for genre in movie["genres"]:
             genres.append(genre["name"])
-        if genre:
+        if genres:
             metadata["categories"] = ",".join(genres)
 
         name = tornado.escape.xhtml_escape(self.current_user)
