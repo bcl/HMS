@@ -1345,7 +1345,7 @@ class XMLListHandler(BaseHandler):
                 'contentType' : row["contentType"] or "movie",
                 'title' : row["title"] or os.path.basename(row["path"])[:-4],
                 'titleSeason' : row["titleSeason"],
-                'description' : description,
+                'description' : description[:250],
                 'sdbifurl' : sdBifUrl,
                 'hdbifurl' : hdBifUrl,
                 'sdPosterUrl' : '%s/media/image/sd/%s' % (host, row["id"]),
