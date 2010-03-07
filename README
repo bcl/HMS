@@ -27,6 +27,20 @@ by Brian C. Lane <bcl@brianlane.com>
       cd hms
       ./hms.py
 
+  == Port 80 ==
+
+  Currently most of the Roku player's APIs work with alternate ports. But not all 
+  of them. So it is best if you can run the server on port 80. Under Linux the
+  easiest way to do this is to just connect port 80 to port 8888 of the server by
+  adding this to your /etc/sysconfig/iptables (or similar) file:
+
+  *nat
+  -A PREROUTING -p tcp -d 192.168.101.4 --dport 80 -j REDIRECT --to-ports 8888
+  COMMIT
+
+  Replace the IP with the IP of the server it is running on. It will direct all 
+  port 80 traffic to port 8888.
+
   == Configuration ==
   The first thing to do is add the directories where your media files are 
   stored. Log into the system and select 'Media Sources'. Give it a name and
