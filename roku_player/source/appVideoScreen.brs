@@ -31,14 +31,34 @@ Function showVideoScreen(episode As Object)
     'Uncomment his line to dump the contents of the episode to be played
     PrintAA(episode)
 
+	lastpos = 0
+ 	screen.SetPositionNotificationPeriod(1)
     while true
         msg = wait(0, port)
-
         if type(msg) = "roVideoScreenEvent" then
             print "showHomeScreen | msg = "; msg.getMessage() " | index = "; msg.GetIndex()
             if msg.isScreenClosed()
                 print "Screen closed"
+
+				' Save the last position to the server
+				print "lastpos = "; lastpos
+				
+				' Need to know:
+				' server URL
+			    url = "http://" + RegRead("ServerURL")
+
+				' User ID and Media ID
+			    url = url +"/user/last/"+ episode.UserId +"/"+ episode.MediaId
+
+				print "url: " + url
+			    http = NewHttp(url)
+			    rsp = http.PostFromStringWithTimeout(itostr(lastpos), 30)
+			    
+			    episode.LastPos = lastpos
                 exit while
+			elseif msg.isPlaybackPosition()
+				print "playback position: "; msg.GetIndex()
+				lastpos = msg.GetIndex()
             elseif msg.isRequestFailed()
                 print "Video request failure: "; msg.GetIndex(); " " msg.GetData() 
             elseif msg.isStatusMessage()

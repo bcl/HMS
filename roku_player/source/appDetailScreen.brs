@@ -57,8 +57,13 @@ Function showDetailScreen(screen As Object, showList As Object, showIndex as Int
                 print "ButtonPressed"
                 if msg.GetIndex() = 1
                     showVideoScreen(showList[showIndex])
+                    refreshShowDetail(screen, showList, showIndex)
                 endif
                 if msg.GetIndex() = 2
+					' Set the starting position
+					showList[showIndex].PlayStart = showList[showIndex].LastPos
+                	showVideoScreen(showList[showIndex])
+                	refreshShowDetail(screen, showList, showIndex)
                 endif
                 if msg.GetIndex() = 3
                 endif
@@ -95,7 +100,13 @@ Function refreshShowDetail(screen As Object, showList As Object, showIndex as In
     screen.SetDescriptionStyle(show.ContentType)
 
     screen.ClearButtons()
-    screen.AddButton(1, "play")    
+	if show.LastPos = 0 then
+    	screen.AddButton(1, "play")    
+	else
+		screen.AddButton(2, "resume playing")
+		screen.AddButton(1, "play from beginning")
+	end if
+
     screen.SetContent(show)
     screen.Show()
 

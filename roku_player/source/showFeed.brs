@@ -52,14 +52,17 @@ End Function
 Function init_show_feed_item() As Object
     o = CreateObject("roAssociativeArray")
 
+	o.UserId           = ""
+	o.MediaId          = ""
     o.ContentId        = ""
     o.Title            = ""
     o.ContentType      = ""
     o.Description      = ""
     o.Length           = ""
-	o.Actors           = CreateObject("roArray", 3, true)
-	o.Director         = CreateObject("roArray", 1, true)
-	o.Categories	   = CreateObject("roArray", 3, true)
+    o.LastPos          = ""
+    o.Actors           = CreateObject("roArray", 3, true)
+    o.Director         = CreateObject("roArray", 1, true)
+    o.Categories	   = CreateObject("roArray", 3, true)
     o.StreamFormats    = CreateObject("roArray", 5, true) 
     o.StreamQualities  = CreateObject("roArray", 5, true) 
     o.StreamBitrates   = CreateObject("roArray", 5, true)
@@ -132,12 +135,15 @@ Function parse_show_feed(xml As Object, feed As Object) As Void
         'fetch all values from the xml for the current show
         item.HDPosterUrl      = validstr(curShow@hdPosterUrl) 
         item.SDPosterUrl      = validstr(curShow@sdPosterUrl) 
-        item.ContentId        = validstr(curShow.contentId.GetText()) 
+        item.ContentId        = validstr(curShow.contentId.GetText())
+		item.UserId           = validstr(curShow.userId.GetText())
+		item.MediaId          = validstr(curShow.mediaId.GetText())
         item.Title            = validstr(curShow.title.GetText()) 
         item.Description      = validstr(curShow.description.GetText()) 
         item.ContentType      = validstr(curShow.contentType.GetText())
         item.ContentQuality   = validstr(curShow.contentQuality.GetText())
         item.Length           = strtoi(validstr(curShow.length.GetText()))
+        item.LastPos          = strtoi(validstr(curShow.lastPos.GetText()))
         item.HDBifUrl         = validstr(curShow.hdBifUrl.GetText())
         item.SDBifUrl         = validstr(curShow.sdBifUrl.GetText())
 		item.StreamFormat     = validstr(curShow.streamFormat.GetText())

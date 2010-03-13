@@ -165,6 +165,17 @@ class DbSchema(object):
             
                 update schema set version=7;
             """,
+            """
+                create table last_position(
+                    id INTEGER PRIMARY KEY,
+                    media_id INTEGER REFERENCES media(id),
+                    user_id INTEGER REFERENCES user(id),
+                    position INTEGER
+                );
+                
+                update schema set version=8;
+            """,
+
         ]
 
     def __init__(self, database):
@@ -1088,6 +1099,45 @@ class UserHandler(BaseHandler):
         return
 
 
+class UserLastPositionHandler(BaseHandler):
+    """
+    Handle the playback position for users
+    This cannot be protected because the Roku doesn't login to the server, so 
+    it is possible to spoof the playback positions
+    """
+    def get(self, user_id, media_id):
+        """
+        Retrieve the last position this user played for the passed media_id
+        """
+        print "User: %s Media %s" % (user_id, media_id)
+        
+    def post(self, user_id, media_id):
+        """
+        Save the last position this user played for the passed media_id
+        """
+        conn = sqlite3.connect(options.database)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        try:
+            # Check to see if there is an entry for this user and media
+            cur.execute("select * from last_position where user_id=? and media_id=?", (user_id, media_id))
+            row = cur.fetchone()
+            if not row:
+                cur.execute("insert into last_position(user_id, media_id, position) "
+                            "values(?,?,?)", 
+                            (user_id, media_id, int(self.request.body)))
+            else:
+                cur.execute("update last_position set position=? where user_id=? "
+                            "and media_id=?",
+                            (int(self.request.body), user_id, media_id))
+            conn.commit()
+        except:
+            print traceback.format_exc()
+        finally:
+            cur.close()
+            conn.close()
+
+
 class UserImageHandler(BaseHandler):
     def get(self, user_id):
         # Get the user's image
@@ -1301,6 +1351,7 @@ class XMLListHandler(BaseHandler):
         conn = sqlite3.connect(options.database)
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
+        pos_cur = conn.cursor()
 
         if int(list_id) > -1:
             cur.execute("select * from media JOIN list_media on list_media.media_id = media.id AND list_media.user_id=? AND list_media.list_id=?", (int(user_id), int(list_id)))
@@ -1309,7 +1360,7 @@ class XMLListHandler(BaseHandler):
 
         media = []
         for row in cur:
-            print row
+#            print row
             coverImage = "%s/images/default.jpg" % (host)
             
             sdBifUrl = None
@@ -1340,6 +1391,20 @@ class XMLListHandler(BaseHandler):
             else:
                 categories = []
 
+            # Get this user's last played position for this media
+            lastpos = 0
+            try:
+                print "user_id=%s media_id=%s" % (user_id, row["id"])
+
+                # Check to see if there is an entry for this user and media
+                pos_cur.execute("select * from last_position where "
+                                "user_id=? and media_id=?",
+                                (int(user_id), int(row["id"])))
+                pos_row = pos_cur.fetchone()
+                if pos_row:
+                    lastpos = int(pos_row["position"])
+            except:
+                pass
 
             metadata = {
                 'contentType' : row["contentType"] or "movie",
@@ -1357,7 +1422,10 @@ class XMLListHandler(BaseHandler):
                     'url' : "%s/media/play/%s" % (host, row["id"]),
                 }],
                 'length' : int(row['length']),
+                'lastPos' : lastpos,
                 'id' : "user_%s-list_%s-movie_%s" % (user_id, list_id, row["id"]),
+                'userId' : int(user_id),
+                'mediaId' : row["id"],
                 'streamFormat' : row["streamFormat"],
                 'releaseDate' : row["releaseDate"],
                 'rating' : row["rating"],
@@ -1461,7 +1529,7 @@ def main():
         "static_path": os.path.join(os.path.dirname(__file__), "static"),
         "cookie_secret": "480BE2C7-E684-4CFB-9BE7-E7BA55952ECB",
         "login_url": "/login",
-        "xsrf_cookies": True,
+        "xsrf_cookies": False,
     }
     
     application = tornado.web.Application([
@@ -1479,6 +1547,7 @@ def main():
         (r"/tmdb/search/(.*)", SearchTMDBHandler),
         (r"/tmdb/update/(.*)/(.*)", UpdateTMDBHandler),
         (r"/list/(.*)/(.*)", ListHandler),
+        (r"/user/last/(.*)/(.*)", UserLastPositionHandler),
         (r"/user/image/(.*)", UserImageHandler),
         (r"/user/edit/(.*)", UserEditHandler),
         (r"/user/(.*)", UserHandler),
