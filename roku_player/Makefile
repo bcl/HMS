@@ -18,7 +18,7 @@
 PKGREL = ../packages
 ZIPREL = ../zips
 SOURCEREL = ..
-APPNAME = homevideo
+APPNAME = roku_player
 VERSION = 1.0
 
 .PHONY: all homevideo
