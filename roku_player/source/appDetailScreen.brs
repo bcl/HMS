@@ -95,7 +95,7 @@ Function refreshShowDetail(screen As Object, showList As Object, showIndex as In
     show = showList[showIndex]
 
     'Uncomment this statement to dump the details for each show
-    PrintAA(show)
+'    PrintAA(show)
 
     screen.SetDescriptionStyle(show.ContentType)
 

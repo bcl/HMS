@@ -42,12 +42,9 @@ Function showVideoScreen(episode As Object)
 
 				' Save the last position to the server
 				print "lastpos = "; lastpos
-				
-				' Need to know:
-				' server URL
-			    url = "http://" + RegRead("ServerURL")
 
-				' User ID and Media ID
+				' server URL +  User ID and Media ID
+			    url = "http://" + RegRead("ServerURL")
 			    url = url +"/user/last/"+ episode.UserId +"/"+ episode.MediaId
 
 				print "url: " + url
