@@ -26,7 +26,7 @@ import shutil
 from optparse import OptionParser
 
 # for mode 0, 1, 2, 3
-videoSizes = ["320x240", "240x180", "320x180", "240x136"]
+videoSizes = ["240x180", "320x240", "240x136", "320x180"]
 
 # Extension to add to the file for mode 0, 1, 2, 3
 modeExtension = ['SD', 'HD', 'SD', 'HD']
@@ -103,7 +103,7 @@ def makeBIF( filename, directory, interval ):
 
     bifTableSize = 8 + (8 * len(images))
     imageIndex = 64 + bifTableSize
-    timestamp = 1
+    timestamp = 0
 
     # Get the length of each image
     for image in images:
