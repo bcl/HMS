@@ -15,8 +15,8 @@
     <userId>{{ metadata["userId"] }}</userId>
     <mediaId>{{ metadata["mediaId"] }}</mediaId>
     <lastPos>{{ metadata["lastPos"] }}</lastPos>
-    <sdBifUrl>{{ metadata["sdbifurl"] }}</sdBifUrl>
-    <hdBifUrl>{{ metadata["hdbifurl"] }}</hdBifUrl>
+    {% if metadata["sdbifurl"] %}<sdBifUrl>{{ metadata["sdbifurl"] }}</sdBifUrl>{% end %}
+    {% if metadata["hdbifurl"] %}<hdBifUrl>{{ metadata["hdbifurl"] }}</hdBifUrl>{% end %}
     
     {% for stream in metadata["streams"] %}
     <media>

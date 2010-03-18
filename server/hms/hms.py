@@ -559,25 +559,16 @@ class UpdateTMDBHandler(BaseHandler):
                     ratings=RATINGS)
 
 
+class RangeHandler(BaseHandler):
+    """
+    Handle serving up a local file while handling Range headers.
 
-class MediaPlayHandler(BaseHandler):
-    def get(self, media_id):
-        print self.request.headers
-
-        # Find the source to this file
-        conn = sqlite3.connect(options.database)
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        cur.execute("select path from media where id=?", (media_id,))
-        row = cur.fetchone()
-        cur.close()
-        conn.close()
-
+    """
+    def serveFile(self, filePath):
         # We only handle local sources right now
-        filePath = row["path"]
-        fileName = os.path.basename(filePath)
-        if not os.path.isfile(filePath):
+        if not filePath or not os.path.isfile(filePath):
             raise tornado.web.HTTPError(404)
+        fileName = os.path.basename(filePath)
 
         self.set_header("Accept-Ranges", "bytes")
         
@@ -590,7 +581,6 @@ class MediaPlayHandler(BaseHandler):
             self.set_header('Content-Type',contentType)
         else:
             pass
- 
 
         # Is the Range header set?
         if 'Range' in self.request.headers:
@@ -647,6 +637,41 @@ class MediaPlayHandler(BaseHandler):
         self.sent += blk_size
 
         self.request.connection.stream.write(self.fp.read(blk_size), self.finishWrite)        
+
+
+class MediaPlayHandler(RangeHandler):
+    def get(self, media_id):
+        print self.request.headers
+
+        # Find the source to this file
+        conn = sqlite3.connect(options.database)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("select path from media where id=?", (media_id,))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        filePath = row["path"]
+        self.serveFile(filePath)
+
+
+class BifPlayHandler(RangeHandler):
+    def get(self, sdorhd, media_id):
+        if sdorhd == 'hd':
+            sql_query = "select hdBifUrl as bif from media where id=?"
+        else:
+            sql_query = "select sdBifUrl as bif from media where id=?"
+
+        # Find the bif file for this media 
+        conn = sqlite3.connect(options.database)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute(sql_query, (media_id,))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        filePath = row["bif"]
+        self.serveFile(filePath)
 
 
 class LoginHandler(BaseHandler):
@@ -1360,18 +1385,14 @@ class XMLListHandler(BaseHandler):
 
         media = []
         for row in cur:
-#            print row
             coverImage = "%s/images/default.jpg" % (host)
             
             sdBifUrl = None
             hdBifUrl = None
-            bifname = "%s-SD.bif" % (os.path.basename(row["path"]).rsplit('.', 1)[0])
-#            if (os.path.isfile(bifname)):
-            sdBifUrl = "%s/movies/%s" % (host,bifname)
-            bifname = "%s-HD.bif" % (os.path.basename(row["path"]).rsplit('.', 1)[0])
-#            if (os.path.isfile(bifname)):
-            hdBifUrl = "%s/movies/%s" % (host,bifname)
-
+            if row["sdBifUrl"] and os.path.isfile(row["sdBifUrl"]):
+                sdBifUrl = "%s/media/bif/sd/%s" % (host,row["id"])
+            if row["hdBifUrl"] and os.path.isfile(row["hdBifUrl"]):
+                hdBifUrl = "%s/media/bif/hd/%s" % (host,row["id"])
 
             description = "%s %d kbps" % (row['media_description'], row['bitrate'])
             description += row["description"] or ""
@@ -1541,6 +1562,7 @@ def main():
         (r"/media/list/(.*)/(.*)", MediaListHandler),
         (r"/media/edit/(.*)", MediaEditHandler),
         (r"/media/play/(.*)", MediaPlayHandler),
+        (r"/media/bif/(.*)/(.*)", BifPlayHandler),
         (r"/media/image/(.*)/(.*)", PosterImageHandler),
         (r"/media/(.*)/(.*)", MediaHandler),
         (r"/media/(.*)", MediaHandler),
