@@ -93,6 +93,7 @@ def makeBIF( filename, directory, interval ):
         if image[-4:] == '.jpg':
             images.append(image)
     images.sort()
+    images = images[1:]
 
     f = open(filename, "wb")
     array.array('B', magic).tofile(f)
