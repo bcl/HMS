@@ -145,8 +145,13 @@ def main():
 
     # This may be useful for determining the video format
     # Get info about the video file
-#    videoInfo = getMP4Info(videoFile)
-#    print videoInfo
+    videoInfo = getMP4Info(videoFile)
+    if videoInfo["size"]: 
+        size = videoInfo["size"].split("x")
+        aspectRatio = float(size[0]) / float(size[1])
+        width, height = videoSizes[options.mode]
+        height = int(width / aspectRatio)
+        videoSizes[options.mode] = (width, height)
 
     tmpDirectory = tempfile.mkdtemp()
 
