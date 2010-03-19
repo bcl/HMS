@@ -26,7 +26,7 @@ import shutil
 from optparse import OptionParser
 
 # for mode 0, 1, 2, 3
-videoSizes = ["240x180", "320x240", "240x136", "320x180"]
+videoSizes = [(240,180), (320,240), (240,136), (320,180)]
 
 # Extension to add to the file for mode 0, 1, 2, 3
 modeExtension = ['SD', 'HD', 'SD', 'HD']
@@ -69,7 +69,8 @@ def extractImages( videoFile, directory, interval, mode=0 ):
     @param interval interval to extract images at, in seconds
 
     """
-    cmd = "ffmpeg -i %s -r %0.2f -s %s %s/%%08d.jpg" % (videoFile, interval/100.0, videoSizes[mode], directory)
+    size = "x".join([str(i) for i in videoSizes[mode]])
+    cmd = "ffmpeg -i %s -r %0.2f -s %s %s/%%08d.jpg" % (videoFile, interval/100.0, size, directory)
     print cmd
     p = Popen( cmd, shell=True, stdout=PIPE, stdin=PIPE)
     (stdout, stderr) = p.communicate()
