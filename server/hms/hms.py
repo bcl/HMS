@@ -311,7 +311,8 @@ def import_local_media(conn, cur, path):
         except:
             print traceback.format_exc()
             media = None
-            
+            media_id = None
+        
         if not media:
             if f[-3:] in ['mp4', 'm4v', 'mov']:
                 mp4info = getMP4Info(os.path.join(path,f))
@@ -336,7 +337,33 @@ def import_local_media(conn, cur, path):
                              streamFormat[f[-3:]])
                             )
             conn.commit()
+            media_id = cur.lastrowid
             new_files.append((os.path.join(path,f),))
+        else:
+            media_id = media["id"]
+
+        # Add bif files if they exist and bifUrl isn't set in the row
+        if media_id:
+            cur.execute("select * from media where id=?", (media_id,))
+            media = cur.fetchone()
+
+            sql_set = []
+            sql_args = []
+
+            sdBifFilename = os.path.join(path,f[:-4] + "-SD.bif")
+            hdBifFilename = os.path.join(path,f[:-4] + "-HD.bif")
+
+            if os.path.isfile(sdBifFilename) and not media["sdBifUrl"]:
+                sql_set.append("sdBifUrl=?")
+                sql_args.append(sdBifFilename)
+            if os.path.isfile(hdBifFilename) and not media["hdBifUrl"]:
+                sql_set.append("hdBifUrl=?")
+                sql_args.append(hdBifFilename)
+            if sql_set:
+                sql_args.append(media_id)
+                sql = "update media set %s where id=?" % (",".join(sql_set))
+                cur.execute(sql, sql_args)
+                conn.commit()
 
     return new_files
 
