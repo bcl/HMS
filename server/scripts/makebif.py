@@ -70,7 +70,7 @@ def extractImages( videoFile, directory, interval, mode=0 ):
 
     """
     size = "x".join([str(i) for i in videoSizes[mode]])
-    cmd = "ffmpeg -i %s -r %0.2f -s %s %s/%%08d.jpg" % (videoFile, interval/100.0, size, directory)
+    cmd = "ffmpeg -i %s -ss 7 -r %0.2f -s %s %s/%%08d.jpg" % (videoFile, interval/100.0, size, directory)
     print cmd
     p = Popen( cmd, shell=True, stdout=PIPE, stdin=PIPE)
     (stdout, stderr) = p.communicate()
