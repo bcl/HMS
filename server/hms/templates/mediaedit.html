@@ -24,16 +24,15 @@
 
 {% block body %}
 <form action="/tmdb/search/{{ metadata["id"] }}" method="post" class="ui-dialog" id="searchForm">
-<fieldset id="search_themoviedb">
+    <fieldset id="search_themoviedb">
     <legend>Search themoviedb.org</legend>
     <div class="form-input"><label for="searchTitle">Title</label>
         <input type="text" size="40" name="searchTitle">
     </div>
     <input type="submit" value="{{ _("Search") }}"/>
-    
     {{ xsrf_form_html() }}
+    </fieldset> 
 </form>
-</fieldset> 
 
 <form enctype="multipart/form-data" action="/media/edit/{{ metadata["id"] }}" method="post" class="ui-dialog" id="mediaForm">
     <fieldset id="media_images">
@@ -185,11 +184,9 @@
 
         <div class="form-input"><label for="artist">Artist</label>
         <input type="text" size="80" name="artist" value="{{ metadata["artist"] or "" }}" /></div>
-    </fieldset>
-    
     <input type="submit" value="{{ _("Update") }}"/>
-    
     {{ xsrf_form_html() }}
+    </fieldset>
 </form>
 </div>
 {% end %}
