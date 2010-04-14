@@ -52,6 +52,7 @@ import traceback
 from subprocess import Popen, PIPE
 import operator
 import cPickle
+import socket
 
 # Tornado modules
 import tornado.httpserver
@@ -1563,8 +1564,16 @@ class MainHandler(BaseHandler):
 def main():
     tornado.options.parse_command_line()
 
+    # Get the local IP
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("brianlane.com",80))
+        local_ip = s.getsockname()[0]
+    except:
+        local_ip = "0.0.0.0"
+
     print "Starting Home Media Server"
-    print "Listening on port %s" % (options.port)
+    print "Listening on %s:%s" % (local_ip, options.port)
     
     # Setup the database
     if not os.path.exists(options.database):

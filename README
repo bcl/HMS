@@ -16,13 +16,12 @@ by Brian C. Lane <bcl@brianlane.com>
 
   On a rpm based system this should work to install all the requirements:
   yum groupinstall "development tools"
-  yum install libcurl-devel libjpeg-devel zlib-devel libmp4v2 python-setuptools
-  easy_install virtualenv pip
+  yum install libcurl-devel libjpeg-devel zlib-devel libmp4v2 python-setuptools \
+        python-virtualenv python-pip python-imaging
 
   == virtualenv setup ==
   Setup the virtual python environment:
       pip -E pyvirt install -r hms/tornado.pip 
-      pip -E pyvirt install pil
       . ./pyvirt/bin/activate
       cd hms
       ./hms.py
