@@ -837,8 +837,6 @@ class MediaDeleteHandler(BaseHandler):
             self.redirect("/media/")
             return
 
-        print self.request
-
         conn = sqlite3.connect(options.database)
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
@@ -1008,13 +1006,26 @@ class MediaHandler(BaseHandler):
 
 class UserDeleteHandler(BaseHandler):
     @tornado.web.authenticated
-    def post(self, media_id):
+    def post(self, user_id):
         """
         Delete the user from the database
         """
-        if self.current_user != 'admin':
-            self.redirect("/media/")
+        if self.current_user != 'admin' or user_id == '1':
+            self.redirect("/user/")
             return
+
+        conn = sqlite3.connect(options.database)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        cur.execute("delete from list where user_id=?", (user_id,))
+        cur.execute("delete from last_position where user_id=?", (user_id,))
+        cur.execute("delete from list_media where user_id=?", (user_id,))
+        cur.execute("delete from user where id=?", (user_id,))
+        conn.commit()
+
+        cur.close()
+        conn.close()
 
         return
 
