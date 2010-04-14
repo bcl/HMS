@@ -730,6 +730,29 @@ class LogoutHandler(BaseHandler):
         self.set_secure_cookie("user", "")
         self.redirect("/login")
 
+
+class SourceDeleteHandler(BaseHandler):
+    @tornado.web.authenticated
+    def post(self, source_id):
+        """
+        Delete the media source
+        """
+        if self.current_user != 'admin':
+            self.redirect("/source/")
+            return
+
+        conn = sqlite3.connect(options.database)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        cur.execute("delete from source where id=?", (source_id,))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+        return
+
+
 class SourceEditHandler(BaseHandler):
     """
     Handle Editing the Media sources
@@ -1644,6 +1667,7 @@ def main():
         (r"/login", LoginHandler),
         (r"/logout", LogoutHandler),
         (r"/source/edit/(.*)", SourceEditHandler),
+        (r"/source/delete/(.*)", SourceDeleteHandler),
         (r"/source/(.*)", SourceHandler),
         (r"/media/list/(.*)/(.*)", MediaListHandler),
         (r"/media/edit/(.*)", MediaEditHandler),
