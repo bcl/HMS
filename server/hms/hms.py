@@ -827,6 +827,16 @@ class SourceHandler(BaseHandler):
         self.redirect("/source/")
 
 
+class MediaDeleteHandler(BaseHandler):
+    @tornado.web.authenticated
+    def post(self, media_id):
+        if self.current_user != 'admin':
+            self.redirect("/media/")
+            return
+
+        return
+
+
 class MediaEditHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self, media_id):
@@ -978,6 +988,16 @@ class MediaHandler(BaseHandler):
     @tornado.web.authenticated
     def post(self, method, *args):
         pass
+
+
+class UserDeleteHandler(BaseHandler):
+    @tornado.web.authenticated
+    def post(self, media_id):
+        if self.current_user != 'admin':
+            self.redirect("/media/")
+            return
+
+        return
 
 
 class UserEditHandler(BaseHandler):
@@ -1600,6 +1620,7 @@ def main():
         (r"/media/play/(.*)", MediaPlayHandler),
         (r"/media/bif/(.*)/(.*)", BifPlayHandler),
         (r"/media/image/(.*)/(.*)", PosterImageHandler),
+        (r"/media/delete/(.*)", MediaDeleteHandler),
         (r"/media/(.*)/(.*)", MediaHandler),
         (r"/media/(.*)", MediaHandler),
         (r"/tmdb/search/(.*)", SearchTMDBHandler),
@@ -1608,6 +1629,7 @@ def main():
         (r"/user/last/(.*)/(.*)", UserLastPositionHandler),
         (r"/user/image/(.*)", UserImageHandler),
         (r"/user/edit/(.*)", UserEditHandler),
+        (r"/user/delete/(.*)", UserDeleteHandler),
         (r"/user/(.*)", UserHandler),
         (r"/xml/users", XMLUsersHandler),
         (r"/xml/list/(.*)/(.*)", XMLListHandler),

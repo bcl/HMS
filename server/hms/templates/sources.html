@@ -35,7 +35,7 @@
 {% for source in sources %}
   <li>{{ escape(source[1]) }} - {{ escape(source[3]) }} 
 		<a href="/media/import/{{ source[0] }}">Import New Media</a>
-		<a href="{{ request.path }}delete/{{ source[0] }}">Delete</a>
+		<a href="{{ request.path }}delete/{{ source[0] }}" class="delete">DELETE</a>
 		<a href="{{ request.path }}edit/{{ source[0] }}">Edit</a>
   </li>
 {% end %}

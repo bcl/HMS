@@ -19,7 +19,7 @@
         <td>
             {% if name == 'admin' %}
             <a href="/media/edit/{{item["id"]}}">EDIT</a> 
-            <a href="/media/delete/{{item["id"]}}">DELETE</a>
+            <a href="/media/delete/{{item["id"]}}" class="delete">DELETE</a>
             {% end %}
         </td>
     </tr>

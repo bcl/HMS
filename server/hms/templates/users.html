@@ -41,7 +41,7 @@
 {% for user in users %}
   <li><img src="{{ request.path }}image/{{ user[0]}}" />
         {{ escape(user[1]) }} - {{ user[2] }} 
-		<a href="{{ request.path }}delete/{{ user[0] }}">Delete</a>
+		<a href="{{ request.path }}delete/{{ user[0] }}" class="delete">DELETE</a>
 		<a href="{{ request.path }}edit/{{ user[0] }}">Edit</a>
   </li>
 {% end %}
