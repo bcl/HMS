@@ -58,6 +58,10 @@
     </div>
     {% end %}
     </fieldset>
+
+    <input type="submit" value="{{ _("Update") }}"/>
+    {{ xsrf_form_html() }}
+
     <fieldset id="movie_details">
     <legend>Movie Details</legend>
         <select name="contentType">
@@ -168,8 +172,6 @@
         <input type="text" size="80" name="hdBifUrl" value="{{ metadata["hdBifUrl"] or "" }}" />
         </div>
 
-        <div class="form-input, hd"><label for="hdPosterUrl">HD Cover URL</label>
-
         <div class="form-input, hd"><label for="hdBranded">HD Branded</label>
         <input type="checkbox" name="hdBranded" {% if metadata["hdBranded"] %}checked{% end %} /></div>
 
@@ -184,8 +186,6 @@
 
         <div class="form-input"><label for="artist">Artist</label>
         <input type="text" size="80" name="artist" value="{{ metadata["artist"] or "" }}" /></div>
-    <input type="submit" value="{{ _("Update") }}"/>
-    {{ xsrf_form_html() }}
     </fieldset>
 </form>
 </div>
