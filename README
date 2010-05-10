@@ -41,6 +41,9 @@ by Brian C. Lane <bcl@brianlane.com>
   port 80 traffic to port 8888.
 
   == Configuration ==
+  Log into the web interface by entering http://urlORipOfYourServer/
+  The admin account is admin/badpassword
+
   The first thing to do is add the directories where your media files are 
   stored. Log into the system and select 'Media Sources'. Give it a name and
   a local path (only local directory is supported at this time).
@@ -51,6 +54,10 @@ by Brian C. Lane <bcl@brianlane.com>
   Click on 'Import New Media' and it will scan the directory for supported
   media files. For movies it will run mp4info on it to get the details of
   the video format.
+
+  Add users to the system so that they can then login and setup their queue
+  however they would like. Note that normal users cannot add or scan media
+  sources, that has to be done by the admin account.
 
 2. Client Installation
 
