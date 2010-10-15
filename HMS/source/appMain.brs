@@ -1,24 +1,22 @@
 '********************************************************************
 '**  Home Media Server Application - Main
-'**  November 2010
 '**  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
 '********************************************************************
 
 Sub Main()
 
+    m.port = CreateObject("roMessagePort")
+
     'initialize theme attributes like titles, logos and overhang color
     initTheme()
 
-    'prepare the screen for display and get ready to begin
-    screen=preShowHomeScreen("", "")
-    if screen=invalid then
-        print "unexpected error in preShowHomeScreen"
+    if not checkServerUrl() then
+        ' Need to show an error to the user here and exit when they click done
+        print "Server URL is invalid"
         return
-    end if
+    endif
 
-    'set to go, time to get started
-    showHomeScreen(screen)
-
+    displayDirectory("http://"+RegRead("ServerURL") )
 End Sub
 
 

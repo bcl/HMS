@@ -1,6 +1,5 @@
 '*****************************************************************
 '**  Home Media Server Application -- Home Screen
-'**  November 2010
 '**  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
 '*****************************************************************
 
@@ -36,7 +35,7 @@ Function showHomeScreen(screen) As Integer
 
     if validateParam(screen, "roPosterScreen", "showHomeScreen") = false return -1
 
-    checkServerUrl()                    ' Check Registry for server URL
+    checkServerUrl(false)                    ' Check Registry for server URL
 
     ' @TODO This needs to show something while it is loading the category list
 

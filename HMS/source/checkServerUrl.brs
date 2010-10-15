@@ -9,14 +9,14 @@
 ' ** Prompt the user to enter the URL or IP if it is not
 ' ** found and write it to the registry.
 '************************************************************
-Function checkServerUrl(forceEdit as Boolean) as Void
+Function checkServerUrl(forceEdit As Boolean) As Boolean
     serverURL = RegRead("ServerURL")
     if (serverURL = invalid) then
         print "ServerURL not found in the registry"
         serverURL = "video.local"
-    else if !forceEdit then
-        print "Server set to ";serverURL
-        return
+    else if not forceEdit then
+        print "Server set to "; serverURL
+        return true
     endif
 
     screen = CreateObject("roKeyboardScreen")
@@ -34,14 +34,14 @@ Function checkServerUrl(forceEdit as Boolean) as Void
         print "message received"
         if type(msg) = "roKeyboardScreenEvent"
             if msg.isScreenClosed()
-                return
+                return false
             else if msg.isButtonPressed() then
                 print "Evt: ";msg.GetMessage();" idx:"; msg.GetIndex()
                 if msg.GetIndex() = 1 then
                     searchText = screen.GetText()
-                    print "search text: "; searchText
+                    print "Server set to "; searchText
                     RegWrite("ServerURL", searchText)
-                    return
+                    return true
                 endif
             endif
         endif
