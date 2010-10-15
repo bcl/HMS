@@ -1,7 +1,7 @@
 '*****************************************************************
-'**  Video Player Example Application -- Home Screen
-'**  November 2009
-'**  Copyright (c) 2009 Roku Inc. All Rights Reserved.
+'**  Home Media Server Application -- Home Screen
+'**  November 2010
+'**  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
 '*****************************************************************
 
 '******************************************************
@@ -36,9 +36,9 @@ Function showHomeScreen(screen) As Integer
 
     if validateParam(screen, "roPosterScreen", "showHomeScreen") = false return -1
 
-	checkServerUrl()							' Check Registry for server URL
+    checkServerUrl()                    ' Check Registry for server URL
 
-	' @TODO This needs to show something while it is loading the category list
+    ' @TODO This needs to show something while it is loading the category list
 
     initCategoryList()
     screen.SetContentList(m.Categories.Kids)
@@ -118,43 +118,3 @@ Function initCategoryList() As Void
 
 End Function
 
-'************************************************************
-' ** Check the registry for the server URL
-' ** Prompt the user to enter the URL or IP if it is not
-' ** found and write it to the registry.
-'************************************************************
-Function checkServerUrl() as Void
-	serverURL = RegRead("ServerURL")
-	if (serverURL = invalid) then
-		print "ServerURL not found in the registry"
-		serverURL = "video.local"
-	endif
-	
-	screen = CreateObject("roKeyboardScreen")
-	port = CreateObject("roMessagePort")
-	screen.SetMessagePort(port)
-	screen.SetTitle("Video Server URL")
-	screen.SetText(serverURL)
-	screen.SetDisplayText("Enter Host Name or IP Address")
-	screen.SetMaxLength(25)
-	screen.AddButton(1, "finished")
-	screen.Show()
-	
-	while true
-		msg = wait(0, screen.GetMessagePort())
-		print "message received"
-		if type(msg) = "roKeyboardScreenEvent"
-			if msg.isScreenClosed()
-				return
-			else if msg.isButtonPressed() then
-				print "Evt: ";msg.GetMessage();" idx:"; msg.GetIndex()
-				if msg.GetIndex() = 1
-					searchText = screen.GetText()
-					print "search text: "; searchText
-					RegWrite("ServerURL", searchText)
-					return
-				endif
-			endif
-		endif
-	end while
-End Function
