@@ -21,13 +21,13 @@ Sub getDirectoryListing(url as String) As Object
     end if
 
     ' grab all the <a href /> elements
-    urls = getUrls([], rsp)
+    urls = getUrls({}, rsp)
     return urls
 End Sub
 
 Sub getUrls(array as Object, element as Object) As Object
     if element.GetName() = "a" and element.HasAttribute("href") then
-        array.Push(element.GetAttributes()["href"])
+        array.AddReplace(element.GetAttributes()["href"], "")
     end if
     if element.GetChildElements()<>invalid then
         for each e in element.GetChildElements()

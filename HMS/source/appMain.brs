@@ -10,7 +10,7 @@ Sub Main()
     'initialize theme attributes like titles, logos and overhang color
     initTheme()
 
-    if not checkServerUrl() then
+    if not checkServerUrl(false) then
         ' Need to show an error to the user here and exit when they click done
         print "Server URL is invalid"
         return

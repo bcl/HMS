@@ -9,14 +9,13 @@
 Sub displayDirectory( url ) As Void
 
     ' Get the directory listing
+    listing = getDirectoryListing(url)
+    if listing = invalid then
+        print "Failed to get directory listing for"; url
+        return
+    end if
 
-    ' If there is an error, show a dialog to the user
-
-    ' What kind of directory display should be shown?
-
-    ' 
-
-
+    print listing
 
 End Sub
 
