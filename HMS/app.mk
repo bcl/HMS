@@ -1,10 +1,16 @@
 #########################################################################
-# Simple makefile for packaging Roku Video Player example
+# common include file for application Makefiles
 #
 # Makefile Usage:
 # > make
 # > make install
 # > make remove
+#
+# to exclude certain files from being added to the zipfile during packaging
+# include a line like this:ZIP_EXCLUDE= -x keys\*
+# that will exclude any file who's name begins with 'keys'
+# to exclude using more than one pattern use additional '-x <pattern>' arguments
+# ZIP_EXCLUDE= -x \*.pkg -x storeassets\*
 #
 # Important Notes: 
 # To use the "install" and "remove" targets to install your
@@ -15,15 +21,13 @@
 #    address of your Roku box. (e.g. export ROKU_DEV_TARGET=192.168.1.1.
 #    Set in your this variable in your shell startup (e.g. .bashrc)
 ##########################################################################  
-PKGREL = ../packages
-ZIPREL = ../zips
+PKGREL = ../../packages
+ZIPREL = ../../zips
 SOURCEREL = ..
-APPNAME = roku_player
-VERSION = 1.0
 
-.PHONY: all homevideo
+.PHONY: all $(APPNAME)
 
-homevideo: 
+$(APPNAME): 
 	@echo "*** Creating $(APPNAME).zip ***"
 
 	@echo "  >> removing old application zip $(ZIPREL)/$(APPNAME).zip"
@@ -44,48 +48,20 @@ homevideo:
 		chmod 755 $(ZIPREL); \
 	fi
 
+# zip .png files without compression
+# do not zip up Makefiles, or any files ending with '~'
 	@echo "  >> creating application zip $(ZIPREL)/$(APPNAME).zip"	
 	@if [ -d $(SOURCEREL)/$(APPNAME) ]; \
 	then \
-		(zip -9 -r "$(ZIPREL)/$(APPNAME).zip" . -x Makefile xml/\* artwork/\*.jpg ); \
+		(zip -0 -r "$(ZIPREL)/$(APPNAME).zip" . -i \*.png $(ZIP_EXCLUDE)); \
+		(zip -9 -r "$(ZIPREL)/$(APPNAME).zip" . -x Makefile $(ZIP_EXCLUDE)); \
 	else \
 		echo "Source for $(APPNAME) not found at $(SOURCEREL)/$(APPNAME)"; \
 	fi
 
 	@echo "*** developer zip  $(APPNAME) complete ***"
 
-archive: 
-	@echo "*** archiving $(APPNAME).zip ***"
-
-	@echo "  >> removing old archive package $(ZIPREL)/$(APPNAME)_archive.zip"
-	@if [ -e "$(ZIPREL)/$(APPNAME)_archive.zip" ]; \
-	then \
-		rm  $(ZIPREL)/$(APPNAME)_archive.zip; \
-	fi
-
-	@echo "  >> creating destination directory $(ZIPREL)"	
-	@if [ ! -d $(ZIPREL) ]; \
-	then \
-		mkdir -p $(ZIPREL); \
-	fi
-
-	@echo "  >> setting directory permissions for $(ZIPREL)"
-	@if [ ! -w $(ZIPREL) ]; \
-	then \
-		chmod 755 $(ZIPREL); \
-	fi
-
-	@echo "  >> creating complete application archive $(ZIPREL)/$(APPNAME)_archive.zip"	
-	@if [ -d $(SOURCEREL)/$(APPNAME) ]; \
-	then \
-		(zip -9 -r "$(ZIPREL)/$(APPNAME)_archive.zip" .); \
-	else \
-		echo "Source for $(APPNAME) not found at $(SOURCEREL)/$(APPNAME)"; \
-	fi
-
-	@echo "*** packaging $(APPNAME) archive file complete ***"
-
-install: homevideo
+install: $(APPNAME)
 	@echo "Installing $(APPNAME) to host $(ROKU_DEV_TARGET)"
 	@curl -s -S -F "mysubmit=Install" -F "archive=@$(ZIPREL)/$(APPNAME).zip" -F "passwd=" http://$(ROKU_DEV_TARGET)/plugin_install | grep "<font color" | sed "s/<font color=\"red\">//"
 

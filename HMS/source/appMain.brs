@@ -1,7 +1,7 @@
 '********************************************************************
-'**  Video Player Example Application - Main
-'**  November 2009
-'**  Copyright (c) 2009 Roku Inc. All Rights Reserved.
+'**  Home Media Server Application - Main
+'**  November 2010
+'**  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
 '********************************************************************
 
 Sub Main()
@@ -48,3 +48,4 @@ Sub initTheme()
     app.SetTheme(theme)
 
 End Sub
+

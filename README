@@ -5,26 +5,8 @@ by Brian C. Lane <bcl@brianlane.com>
 1. Server Installation
   == REQUIREMENTS ==
 
-  a. Python
-  b. virtualenv
-  c. pip
-  d. libcurl-devel
-  e. libjpeg-devel
-  f. zlib-devel
-  g. libmp4v2
-  h. "Development Tools"
-
-  On a rpm based system this should work to install all the requirements:
-  yum groupinstall "development tools"
-  yum install libcurl-devel libjpeg-devel zlib-devel libmp4v2 python-setuptools \
-        python-virtualenv python-pip python-imaging
-
-  == virtualenv setup ==
-  Setup the virtual python environment:
-      pip -E pyvirt install -r hms/tornado.pip 
-      . ./pyvirt/bin/activate
-      cd hms
-      ./hms.py
+  1. A web server that can handle HTTP range requests. Apache and lighttpd are 
+     two examples.
 
   == Port 80 ==
 
@@ -41,23 +23,30 @@ by Brian C. Lane <bcl@brianlane.com>
   port 80 traffic to port 8888.
 
   == Configuration ==
-  Log into the web interface by entering http://urlORipOfYourServer/
-  The admin account is admin/badpassword
 
-  The first thing to do is add the directories where your media files are 
-  stored. Log into the system and select 'Media Sources'. Give it a name and
-  a local path (only local directory is supported at this time).
-  Click 'Add Source'
+  The client software will display directories from the webserver, so make sure
+  that a directory is returned when the url is visited.
 
-  Delete links currently don't prompt before deleting, be careful.
+  Directory names will be used as the name of the category, with _ (underscore)
+  replaced with a space. 
 
-  Click on 'Import New Media' and it will scan the directory for supported
-  media files. For movies it will run mp4info on it to get the details of
-  the video format.
+  If there is a file with the same name ending in .jpg or .png that will be used
+  for the icon of that directory.
 
-  Add users to the system so that they can then login and setup their queue
-  however they would like. Note that normal users cannot add or scan media
-  sources, that has to be done by the admin account.
+  If a directory contains the file 'episodes' the client will use the name of the
+  parent directory as the name of the Show and season. Video in the directory
+  will be shown using the episode selector.
+
+  Videos should be valid files supported by the Roku (add list here)
+  If there is the same filename with .jpg or .png extension that will be used for
+  the cover shot for the video.
+  If there is a file ending in .txt that will be used for the details page.
+
+  If the filename has _SD or _HD it will be played as a SD or HD video
+  If the filename has _dddd it will be used as the kbps value
+
+  If the directory is full of .jpg images it will be displayed as a photo album
+  If the directory is full of .mp3 files then they will be played
 
 2. Client Installation
 
@@ -66,7 +55,7 @@ by Brian C. Lane <bcl@brianlane.com>
 
 3. Contribute
 
-
+  http://github.com/bcl/HMS/
 
 
 
