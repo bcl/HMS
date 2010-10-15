@@ -3,29 +3,35 @@
 ' **  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
 ' ********************************************************************
 
-Sub MainTest()
+Sub getDirectoryListing(url as String) As Object
     http = CreateObject("roUrlTransfer")
-    http.SetUrl("http://wyatt.brianlane.com/")
+    http.SetUrl(url)
     dir = http.GetToString()
 
-    ' Try parsing as if it is XML
+    if dir = invalid then
+        print "Could not get directory listing"
+        return invalid
+    end if
+
+    ' Try parsing the html as if it is XML
     rsp=CreateObject("roXMLElement")
     if not rsp.Parse(dir) then
         print "Cannot parse directory listing as XML"
-        stop
+        return invalid
     end if
+
     ' grab all the <a href /> elements
-    urls = GetUrls([], rsp)
-    print urls
+    urls = getUrls([], rsp)
+    return urls
 End Sub
 
-Sub GetUrls(array as Object, element as Object) As Object
+Sub getUrls(array as Object, element as Object) As Object
     if element.GetName() = "a" and element.HasAttribute("href") then
         array.Push(element.GetAttributes()["href"])
     end if
     if element.GetChildElements()<>invalid then
         for each e in element.GetChildElements()
-            GetUrls(array, e)
+            getUrls(array, e)
         end for
     end if
     return array
