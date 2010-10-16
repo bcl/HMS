@@ -33,7 +33,12 @@ Sub displayDirectory( url ) As Void
         displayList = displayVideos(files)
     end if
 
+    Sort( displayList, function(k)
+                           return LCase(k[0])
+                       end function)
+
     for each f in displayList
+        print f[0]
         print f[1]
     end for
 End Sub
@@ -52,7 +57,7 @@ Sub displayVideos( files As Object ) As Object
         p = CreateObject("roPath", "pkg:/" + f)
         if p.IsValid() then
             fileType = videoTypes[p.Split().extension.mid(1)]
-            if fileType = true then
+            if f.Right(1) = "/" or fileType = true then
                 list.push([f, p.Split()])
             end if
         end if
