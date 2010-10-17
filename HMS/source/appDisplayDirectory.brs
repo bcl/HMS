@@ -21,18 +21,22 @@ Sub displayDirectory( url ) As Void
     ' videos(0) - default, photos(1), songs(2), episodes(3)
     if files.DoesExist("photos") then
         dirType = 1
-        displayList  = displayPhotos(files)
+        displayList  = displayFiles(files, { jpg : true })
     else if files.DoesExist("songs") then
         dirType = 2
-        displayList = displaySongs(files)
+        displayList = displayFiles(files, { mp3 : true })
     else if files.DoesExist("episodes") then
         dirType = 3
-        displayList = displayEpisodes(files)
+        displayList = displayFiles(files, { mp4 : true, m4v : true, mov : true, wmv : true } )
+    else if files.DoesExist("movies") then
+        dirType = 4
+        displayList = displayFiles(files, { mp4 : true, m4v : true, mov : true, wmv : true } )
     else
         dirType = 0
-        displayList = displayVideos(files)
+        displayList = displayFiles(files, {}, true)
     end if
 
+    ' Sort the list, case-insensitive
     Sort( displayList, function(k)
                            return LCase(k[0])
                        end function)
@@ -49,15 +53,14 @@ End Sub
 '** Videos end in the following extensions
 '** .mp4 .m4v .mov .wmv
 '******************************************************
-Sub displayVideos( files As Object ) As Object
-    videoTypes = { mp4 : true, m4v : true, mov : true, wmv : true }
+Sub displayFiles( files As Object, fileTypes As Object, dirs=false As Boolean ) As Object
     list = []
     for each f in files
         ' This expects the path to have a system volume at the start
         p = CreateObject("roPath", "pkg:/" + f)
         if p.IsValid() then
-            fileType = videoTypes[p.Split().extension.mid(1)]
-            if f.Right(1) = "/" or fileType = true then
+            fileType = fileTypes[p.Split().extension.mid(1)]
+            if (dirs and f.Right(1) = "/") or fileType = true then
                 list.push([f, p.Split()])
             end if
         end if
