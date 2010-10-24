@@ -41,10 +41,14 @@ Sub displayDirectory( url ) As Void
                            return LCase(k[0])
                        end function)
 
-    for each f in displayList
-        print f[0]
-        print f[1]
-    end for
+'    for each f in displayList
+'        print f[0]
+'        print f[1]
+'    end for
+    if dirType = 0 then
+        ret = showCategories( displayList )
+    end if
+
 End Sub
 
 '******************************************************
@@ -58,7 +62,7 @@ Sub displayFiles( files As Object, fileTypes As Object, dirs=false As Boolean ) 
     for each f in files
         ' This expects the path to have a system volume at the start
         p = CreateObject("roPath", "pkg:/" + f)
-        if p.IsValid() then
+        if p.IsValid() and f.Left(1) <> "." then
             fileType = fileTypes[p.Split().extension.mid(1)]
             if (dirs and f.Right(1) = "/") or fileType = true then
                 list.push([f, p.Split()])
@@ -67,5 +71,43 @@ Sub displayFiles( files As Object, fileTypes As Object, dirs=false As Boolean ) 
     end for
 
     return list
+End Sub
+
+'******************************************************
+'** Display a flat-category poster screen of items
+'** return the one selected by the user or nil?
+'******************************************************
+Sub showCategories( files As Object ) As Object
+    screen = CreateObject("roPosterScreen")
+    screen.SetBreadcrumbText("bc-1", "bc-2")
+    screen.SetMessagePort(m.port)
+    screen.SetListStyle("flat-category")
+    screen.SetListDisplayMode("zoom-to-fill")
+
+    list = CreateObject("roArray", files.Count(), true)
+    for each f in files
+        print f
+
+        o = CreateObject("roAssociativeArray")
+        o.ContentType = "episode"
+        o.ShortDescriptionLine1 = f[1]["basename"]
+
+        print o
+        list.Push(o)
+    end for
+
+    screen.SetContentList(list)
+    screen.Show()
+
+    done = false
+    while not done
+        msg = wait(0, m.port)
+        print msg
+        if msg = invalid or msg.isScreenClosed() then
+            return -1
+        else if msg.isListItemSelected() then
+            print "msg: ";msg.GetMessage();" idx: ";msg.GetIndex()
+        end if
+    end while
 End Sub
 
