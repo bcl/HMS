@@ -656,3 +656,24 @@ Function validateParam(param As Object, paramType As String,functionName As Stri
     print "invalid parameter of type "; type(param); " for "; paramType; " in function "; functionName
     return false
 End Function
+
+'******************************************************
+'** Join the members of a list with a string
+'******************************************************
+Function joinString(list as Object, j as String, first=false, last=false) As String
+    if first then
+        str = j
+    else
+        str = ""
+    end if
+
+    for each f in list
+        str = str + f
+        if last or list.Peek() <> f then
+            str = str + j
+        end if
+    end for
+
+    return str
+End Function
+
