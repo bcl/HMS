@@ -6,19 +6,32 @@
 '******************************************************
 '** Show the contents of url
 '******************************************************
-Sub displayDirectory( url ) As Void
+Function displayDirectory( url As String ) As Object
+    print "url: ";url
+
+    port=CreateObject("roMessagePort")
+    screen = CreateObject("roPosterScreen")
+    screen.SetMessagePort(port)
+    screen.SetListStyle("flat-category")
+    screen.SetListDisplayMode("zoom-to-fill")
+
+    ' Get last element of URL to use as a breadcrumb
+    toks = url.tokenize("/")
+    bc1 = ""
+    bc2 = toks[toks.Count()-1]
+    screen.SetBreadcrumbText(bc1, bc2)
+    screen.Show()
 
     ' Get the directory listing
     files = getDirectoryListing(url)
+    print "got listing"
     if files = invalid then
-        print "Failed to get directory listing for"; url
-        return
+        print "Failed to get directory listing for";url
+        return invalid
     end if
 
-    'print files
-
     ' Figure out what kind of directory this is
-    ' videos(0) - default, photos(1), songs(2), episodes(3)
+    ' dirs(0) - default, photos(1), songs(2), episodes(3), movies(4)
     if files.DoesExist("photos") then
         dirType = 1
         displayList  = displayFiles(files, { jpg : true })
@@ -41,15 +54,28 @@ Sub displayDirectory( url ) As Void
                            return LCase(k[0])
                        end function)
 
+'    print "dirType: ";dirType
 '    for each f in displayList
 '        print f[0]
 '        print f[1]
 '    end for
-    if dirType = 0 then
-        ret = showCategories( displayList )
+
+    if displayList.Count() = 0 then
+        return invalid
     end if
 
-End Sub
+    if dirType = 0 then
+        ret = showCategories( screen, displayList )
+        if ret <> invalid then
+            return ret[1]["basename"]
+        else
+            return invalid
+        end if
+    else
+        return invalid
+    end if
+
+End Function
 
 '******************************************************
 '** Return a list of the Videos and directories
@@ -57,7 +83,7 @@ End Sub
 '** Videos end in the following extensions
 '** .mp4 .m4v .mov .wmv
 '******************************************************
-Sub displayFiles( files As Object, fileTypes As Object, dirs=false As Boolean ) As Object
+Function displayFiles( files As Object, fileTypes As Object, dirs=false As Boolean ) As Object
     list = []
     for each f in files
         ' This expects the path to have a system volume at the start
@@ -71,18 +97,13 @@ Sub displayFiles( files As Object, fileTypes As Object, dirs=false As Boolean ) 
     end for
 
     return list
-End Sub
+End Function
 
 '******************************************************
 '** Display a flat-category poster screen of items
 '** return the one selected by the user or nil?
 '******************************************************
-Sub showCategories( files As Object ) As Object
-    screen = CreateObject("roPosterScreen")
-    screen.SetBreadcrumbText("bc-1", "bc-2")
-    screen.SetMessagePort(m.port)
-    screen.SetListStyle("flat-category")
-    screen.SetListDisplayMode("zoom-to-fill")
+Function showCategories( screen As Object, files As Object ) As Object
 
     list = CreateObject("roArray", files.Count(), true)
     for each f in files
@@ -99,15 +120,17 @@ Sub showCategories( files As Object ) As Object
     screen.SetContentList(list)
     screen.Show()
 
-    done = false
-    while not done
-        msg = wait(0, m.port)
+    while true
+        msg = wait(0, screen.GetMessagePort())
         print msg
         if msg = invalid or msg.isScreenClosed() then
-            return -1
+            ' UP appears to close the screen, so we get here
+            print "screen closed"
+            return invalid
         else if msg.isListItemSelected() then
             print "msg: ";msg.GetMessage();" idx: ";msg.GetIndex()
+            return files[msg.GetIndex()]
         end if
     end while
-End Sub
+End Function
 

@@ -2,11 +2,7 @@
 '**  Home Media Server Application - Main
 '**  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
 '********************************************************************
-
 Sub Main()
-
-    m.port = CreateObject("roMessagePort")
-
     'initialize theme attributes like titles, logos and overhang color
     initTheme()
 
@@ -16,7 +12,30 @@ Sub Main()
         return
     endif
 
-    displayDirectory("http://"+RegRead("ServerURL") )
+    screen = PreShowPosterScreen()
+    if screen = invalid then
+        print "Error creating initial poster screen"
+        return
+    end if
+
+    path = []
+
+    done = false
+    while not done
+        print path
+        pathString = joinString(path, "/", true, true)
+        print pathString
+        ret = displayDirectory( "http://"+RegRead("ServerURL")+pathString )
+        print "main: ";ret
+        print "depth:";path.Count()
+        if ret = invalid and path.Count() = 0 then
+            done = true
+        else if ret = invalid then
+            path.Pop()
+        else
+            path.Push(ret)
+        end if
+    end while
 End Sub
 
 
@@ -27,7 +46,6 @@ End Sub
 '** Theme attributes affect the branding of the application
 '** and are artwork, colors and offsets specific to the app
 '*************************************************************
-
 Sub initTheme()
 
     app = CreateObject("roAppManager")
@@ -46,4 +64,16 @@ Sub initTheme()
     app.SetTheme(theme)
 
 End Sub
+
+'*************************************************************
+'** Setup something as a placeholder while we load
+'*************************************************************
+Function preShowPosterScreen() As Object
+    port=CreateObject("roMessagePort")
+    screen = CreateObject("roPosterScreen")
+    screen.SetMessagePort(port)
+    screen.SetListStyle("flat-category")
+    screen.Show()
+    return screen
+End Function
 
