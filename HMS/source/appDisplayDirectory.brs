@@ -116,6 +116,8 @@ Function showCategories( screen As Object, files As Object, dir as Object, url a
 
     list = CreateObject("roArray", files.Count(), true)
     for each f in files
+        print f[0]
+
         o = CreateObject("roAssociativeArray")
         o.ContentType = "episode"
         o.ShortDescriptionLine1 = f[1]["basename"]
@@ -211,10 +213,12 @@ Function showMovies( screen As Object, files As Object, dir as Object, url as St
         else if msg.isListItemSelected() then
             print "msg: ";msg.GetMessage();" idx: ";msg.GetIndex()
             ' If the selected entry is a directory, return it
+            if (files[msg.GetIndex()][0].Right(1) = "/")
+                return files[msg.GetIndex()]
+            else
             ' If it is a movie, play it
-
-
-            return files[msg.GetIndex()]
+            print "Play movie here"
+            end if
         end if
     end while
 End Function
