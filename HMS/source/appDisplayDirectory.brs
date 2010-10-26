@@ -12,7 +12,6 @@ Function displayDirectory( url As String ) As Object
     port=CreateObject("roMessagePort")
     screen = CreateObject("roPosterScreen")
     screen.SetMessagePort(port)
-    screen.SetListStyle("flat-category")
     screen.SetListDisplayMode("zoom-to-fill")
 
     ' Get last element of URL to use as a breadcrumb
@@ -71,6 +70,8 @@ Function displayDirectory( url As String ) As Object
         else
             return invalid
         end if
+    else if dirType = 4 then
+        ret = showMovies( screen, displayList, dir, url )
     else
         return invalid
     end if
@@ -104,6 +105,8 @@ End Function
 '** return the one selected by the user or nil?
 '******************************************************
 Function showCategories( screen As Object, files As Object, dir as Object, url as String ) As Object
+    screen.SetListStyle("flat-category")
+
     sdImageTypes = []
     sdImageTypes.Push("-SD.jpg")
     sdImageTypes.Push("-SD.png")
@@ -149,6 +152,68 @@ Function showCategories( screen As Object, files As Object, dir as Object, url a
             return invalid
         else if msg.isListItemSelected() then
             print "msg: ";msg.GetMessage();" idx: ";msg.GetIndex()
+            return files[msg.GetIndex()]
+        end if
+    end while
+End Function
+
+'******************************************************
+'** Display a arced-portrait poster screen of items
+'** return the one selected by the user or nil?
+'******************************************************
+Function showMovies( screen As Object, files As Object, dir as Object, url as String ) As Object
+    screen.SetListStyle("arced-portrait")
+
+    sdImageTypes = []
+    sdImageTypes.Push("-SD.jpg")
+    sdImageTypes.Push("-SD.png")
+    hdImageTypes = []
+    hdImageTypes.Push("-HD.jpg")
+    hdImageTypes.Push("-HD.png")
+
+    list = CreateObject("roArray", files.Count(), true)
+    for each f in files
+        print f[0]
+        o = CreateObject("roAssociativeArray")
+        o.ContentType = "movie"
+        o.ShortDescriptionLine1 = f[1]["basename"]
+
+        o.SDPosterUrl = "pkg:/dir-SD.png"
+        o.HDPosterUrl = "pkg:/dir-HD.png"
+        ' poster images in the dir?
+        for each i in sdImageTypes
+            if dir.DoesExist(f[1]["basename"]+i) then
+                o.SDPosterUrl = url + f[1]["basename"] + i
+                exit for
+            end if
+        end for
+
+        for each i in hdImageTypes
+            if dir.DoesExist(f[1]["basename"]+i) then
+                o.HDPosterUrl = url + f[1]["basename"] + i
+                exit for
+            end if
+        end for
+
+        list.Push(o)
+    end for
+
+    screen.SetContentList(list)
+    screen.Show()
+
+    while true
+        msg = wait(0, screen.GetMessagePort())
+        print msg
+        if msg = invalid or msg.isScreenClosed() then
+            ' UP appears to close the screen, so we get here
+            print "screen closed"
+            return invalid
+        else if msg.isListItemSelected() then
+            print "msg: ";msg.GetMessage();" idx: ";msg.GetIndex()
+            ' If the selected entry is a directory, return it
+            ' If it is a movie, play it
+
+
             return files[msg.GetIndex()]
         end if
     end while
