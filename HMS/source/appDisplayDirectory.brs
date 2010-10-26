@@ -23,30 +23,30 @@ Function displayDirectory( url As String ) As Object
     screen.Show()
 
     ' Get the directory listing
-    files = getDirectoryListing(url)
+    dir = getDirectoryListing(url)
     print "got listing"
-    if files = invalid then
+    if dir = invalid then
         print "Failed to get directory listing for";url
         return invalid
     end if
 
     ' Figure out what kind of directory this is
     ' dirs(0) - default, photos(1), songs(2), episodes(3), movies(4)
-    if files.DoesExist("photos") then
+    if dir.DoesExist("photos") then
         dirType = 1
-        displayList  = displayFiles(files, { jpg : true })
-    else if files.DoesExist("songs") then
+        displayList  = displayFiles(dir, { jpg : true })
+    else if dir.DoesExist("songs") then
         dirType = 2
-        displayList = displayFiles(files, { mp3 : true })
-    else if files.DoesExist("episodes") then
+        displayList = displayFiles(dir, { mp3 : true })
+    else if dir.DoesExist("episodes") then
         dirType = 3
-        displayList = displayFiles(files, { mp4 : true, m4v : true, mov : true, wmv : true } )
-    else if files.DoesExist("movies") then
+        displayList = displayFiles(dir, { mp4 : true, m4v : true, mov : true, wmv : true } )
+    else if dir.DoesExist("movies") then
         dirType = 4
-        displayList = displayFiles(files, { mp4 : true, m4v : true, mov : true, wmv : true } )
+        displayList = displayFiles(dir, { mp4 : true, m4v : true, mov : true, wmv : true } )
     else
         dirType = 0
-        displayList = displayFiles(files, {}, true)
+        displayList = displayFiles(dir, {}, true)
     end if
 
     ' Sort the list, case-insensitive
@@ -65,7 +65,7 @@ Function displayDirectory( url As String ) As Object
     end if
 
     if dirType = 0 then
-        ret = showCategories( screen, displayList )
+        ret = showCategories( screen, displayList, dir, url )
         if ret <> invalid then
             return ret[1]["basename"]
         else
@@ -103,17 +103,37 @@ End Function
 '** Display a flat-category poster screen of items
 '** return the one selected by the user or nil?
 '******************************************************
-Function showCategories( screen As Object, files As Object ) As Object
+Function showCategories( screen As Object, files As Object, dir as Object, url as String ) As Object
+    sdImageTypes = []
+    sdImageTypes.Push("-SD.jpg")
+    sdImageTypes.Push("-SD.png")
+    hdImageTypes = []
+    hdImageTypes.Push("-HD.jpg")
+    hdImageTypes.Push("-HD.png")
 
     list = CreateObject("roArray", files.Count(), true)
     for each f in files
-        print f
-
         o = CreateObject("roAssociativeArray")
         o.ContentType = "episode"
         o.ShortDescriptionLine1 = f[1]["basename"]
 
-        print o
+        o.SDPosterUrl = "pkg:/dir-SD.png"
+        o.HDPosterUrl = "pkg:/dir-HD.png"
+        ' poster images in the dir?
+        for each i in sdImageTypes
+            if dir.DoesExist(f[1]["basename"]+i) then
+                o.SDPosterUrl = url + f[1]["basename"] + i
+                exit for
+            end if
+        end for
+
+        for each i in hdImageTypes
+            if dir.DoesExist(f[1]["basename"]+i) then
+                o.HDPosterUrl = url + f[1]["basename"] + i
+                exit for
+            end if
+        end for
+
         list.Push(o)
     end for
 
