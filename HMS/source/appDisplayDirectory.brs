@@ -115,6 +115,13 @@ Function showCategories( screen As Object, files As Object, dir as Object, url a
     hdImageTypes.Push("-HD.png")
 
     list = CreateObject("roArray", files.Count(), true)
+    o = CreateObject("roAssociativeArray")
+    o.ContentType = "episode"
+    o.ShortDescriptionLine1 = "Setup"
+    o.SDPosterURL = "pkg://setup-SD.png"
+    o.HDPosterURL = "pkg://setup-HD.png"
+    list.Push(o)
+
     for each f in files
         print f[0]
 
@@ -143,6 +150,7 @@ Function showCategories( screen As Object, files As Object, dir as Object, url a
     end for
 
     screen.SetContentList(list)
+    screen.SetFocusedListItem(1)
     screen.Show()
 
     while true
@@ -153,8 +161,12 @@ Function showCategories( screen As Object, files As Object, dir as Object, url a
             print "screen closed"
             return invalid
         else if msg.isListItemSelected() then
-            print "msg: ";msg.GetMessage();" idx: ";msg.GetIndex()
-            return files[msg.GetIndex()]
+            if msg.GetIndex() = 0 then
+                checkServerUrl(true)
+            else
+                print "msg: ";msg.GetMessage();" idx: ";msg.GetIndex()
+                return files[msg.GetIndex()-1]
+            end if
         end if
     end while
 End Function

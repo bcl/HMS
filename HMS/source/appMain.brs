@@ -6,17 +6,17 @@ Sub Main()
     'initialize theme attributes like titles, logos and overhang color
     initTheme()
 
-    if not checkServerUrl(false) then
-        ' Need to show an error to the user here and exit when they click done
-        print "Server URL is invalid"
-        return
-    endif
-
     screen = PreShowPosterScreen()
     if screen = invalid then
         print "Error creating initial poster screen"
         return
     end if
+
+    if not checkServerUrl(false) then
+        ' Need to show an error to the user here and exit when they click done
+        print "Server URL is invalid"
+        return
+    endif
 
     path = []
 
