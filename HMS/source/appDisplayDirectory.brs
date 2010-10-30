@@ -173,9 +173,15 @@ Function showMovies( screen As Object, files As Object, dir as Object, url as St
     hdImageTypes.Push("-HD.jpg")
     hdImageTypes.Push("-HD.png")
 
+    streamFormat = { mp4 : "mp4", m4v : "mp4", mov : "mp4",
+                     wmv : "wmv", hls : "hls"
+                   }
+
     list = CreateObject("roArray", files.Count(), true)
     for each f in files
         print f[0]
+        print f[1]
+
         o = CreateObject("roAssociativeArray")
         o.ContentType = "movie"
         o.ShortDescriptionLine1 = f[1]["basename"]
@@ -210,15 +216,18 @@ Function showMovies( screen As Object, files As Object, dir as Object, url as St
         o.Rating = "NR"
         o.StarRating = 100
         o.Title = f[1]["basename"]
-
-        ' Is there a generic number?
-        o.Length = 60
+        o.Length = 0
 
         ' Video related stuff (can I put this all in the same object?)
         o.StreamBitrates = [0]
         o.StreamUrls = [url + f[0]]
         o.StreamQualities = ["SD"]
-        o.StreamFormat = ["mp4"]
+        if streamFormat.DoesExist(f[1]["extension"].Mid(1)) then
+            o.StreamFormat = streamFormat[f[1]["extension"].Mid(1)]
+            print o.StreamFormat
+        else
+            o.StreamFormat = ["mp4"]
+        end if
 
         list.Push(o)
     end for
