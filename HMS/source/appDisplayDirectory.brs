@@ -197,6 +197,22 @@ Function showMovies( screen As Object, files As Object, dir as Object, url as St
             end if
         end for
 
+        o.IsHD = false
+        o.HDBranded = false
+        o.Description = "Should try reading this from a file"
+        o.Rating = "NR"
+        o.StarRating = 100
+        o.Title = f[1]["basename"]
+
+        ' Is there a generic number?
+        o.Length = 60
+
+        ' Video related stuff (can I put this all in the same object?)
+        o.StreamBitrates = [0]
+        o.StreamUrls = [url + f[0]]
+        o.StreamQualities = ["SD"]
+        o.StreamFormat = ["mp4"]
+
         list.Push(o)
     end for
 
@@ -216,10 +232,44 @@ Function showMovies( screen As Object, files As Object, dir as Object, url as St
             if (files[msg.GetIndex()][0].Right(1) = "/")
                 return files[msg.GetIndex()]
             else
-            ' If it is a movie, play it
-            print "Play movie here"
+                ' If it is a movie, play it
+                playMovie(list[msg.GetIndex()])
             end if
         end if
     end while
 End Function
+
+
+'******************************************************
+'** Play the video using the data from the movie
+'** metadata object passed to it
+'******************************************************
+Sub playMovie( movie as Object)
+    p = CreateObject("roMessagePort")
+    video = CreateObject("roVideoScreen")
+    video.setMessagePort(p)
+
+    video.SetContent(movie)
+    video.show()
+
+    lastPos = 0
+    while true
+        msg = wait(0, video.GetMessagePort())
+        if type(msg) = "roVideoScreenEvent"
+            if msg.isScreenClosed() then 'ScreenClosed event
+                print "Closing video screen"
+                exit while
+            else if msg.isPlaybackPosition() then
+                lastPos = msg.GetIndex()
+            else if msg.isRequestFailed()
+                print "play failed: "; msg.GetMessage()
+            else
+                print "Unknown event: "; msg.GetType(); " msg: "; msg.GetMessage()
+            end if
+        end if
+    end while
+
+    ' Save the last played position someplace
+
+End Sub
 
