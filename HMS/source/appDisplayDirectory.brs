@@ -197,6 +197,13 @@ Function showMovies( screen As Object, files As Object, dir as Object, url as St
             end if
         end for
 
+        if dir.DoesExist(f[1]["basename"]+"-SD.bif") then
+            o.SDBifUrl = url+f[1]["basename"]+"-SD.bif"
+        end if
+        if dir.DoesExist(f[1]["basename"]+"-HD.bif") then
+            o.SDBifUrl = url+f[1]["basename"]+"-HD.bif"
+        end if
+
         o.IsHD = false
         o.HDBranded = false
         o.Description = "Should try reading this from a file"
