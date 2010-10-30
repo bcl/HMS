@@ -24,38 +24,47 @@ by Brian C. Lane <bcl@brianlane.com>
 
   == Configuration ==
 
+  (NOTE: Not all of this has been implemented at this time)
+
   The client software will display directories from the webserver, so make sure
   that a directory is returned when the url is visited.
 
-  Directory names will be used as the name of the category, with _ (underscore)
-  replaced with a space. 
+  The client software displays the directories on the server, allowing you 
+  to organize your content into categories however you wish.
 
-  If there is a file with the same name ending in .jpg or .png that will be used
-  for the icon of that directory.
+  They type of playback for a directory is controlled by an empty file inside
+  the directory named:
+
+  movies    A list of movies to play
+  episodes  Episode selector for the files in the directory
+  songs     Play the songs using the song player
+  photos    Show the images as a slideshow
+
+  If there is no file it will only display directories.
+
+  In all cases where a directory or movie are displayed if there is a file
+  with the same name but ending in .jpg or .png it will be used as the image
+  for the icon or cover.
 
   If a directory contains the file 'episodes' the client will use the name of the
   parent directory as the name of the Show and season. Video in the directory
   will be shown using the episode selector.
 
-  Videos should be valid files supported by the Roku (add list here)
-  If there is the same filename with .jpg or .png extension that will be used for
-  the cover shot for the video.
+  Videos should be valid files supported by the Roku (mp4, wmv, mov, m4v)
   If there is a file ending in .txt that will be used for the details page.
 
-  If the filename has _SD or _HD it will be played as a SD or HD video
-  If the filename has _dddd it will be used as the kbps value
+  If the filename has -SD or -HD it will be played as a SD or HD video
 
-  If the directory is full of .jpg images it will be displayed as a photo album
-  If the directory is full of .mp3 files then they will be played
 
 2. Client Installation
 
 
 
 
-3. Contribute
+3. Support/Contribute
 
   http://github.com/bcl/HMS/
-
+  homemedia@googlegroups.com
+  http://groups.google.com/group/homemedia
 
 
