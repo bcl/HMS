@@ -70,8 +70,10 @@ Function displayDirectory( url As String ) As Object
         else
             return invalid
         end if
+    else if dirType = 3 then
+        ret = showVideos( screen, displayList, dir, url, true)
     else if dirType = 4 then
-        ret = showMovies( screen, displayList, dir, url )
+        ret = showVideos( screen, displayList, dir, url, false )
     else
         return invalid
     end if
@@ -172,11 +174,16 @@ Function showCategories( screen As Object, files As Object, dir as Object, url a
 End Function
 
 '******************************************************
-'** Display a arced-portrait poster screen of items
-'** return the one selected by the user or nil?
+'** Display a arced-portrait or flat-episodic poster
+'** screen of items
+'** Handle playback of selected video
 '******************************************************
-Function showMovies( screen As Object, files As Object, dir as Object, url as String ) As Object
-    screen.SetListStyle("arced-portrait")
+Function showVideos( screen As Object, files As Object, dir as Object, url as String, episodes As Boolean ) As Object
+    if episodes then
+        screen.SetListStyle("flat-episodic")
+    else
+        screen.SetListStyle("arced-portrait")
+    end if
 
     sdImageTypes = []
     sdImageTypes.Push("-SD.jpg")
@@ -224,7 +231,7 @@ Function showMovies( screen As Object, files As Object, dir as Object, url as St
 
         o.IsHD = false
         o.HDBranded = false
-        o.Description = "Should try reading this from a file"
+        o.Description = getDescription(f[1]["basename"], url, dir)
         o.Rating = "NR"
         o.StarRating = 100
         o.Title = f[1]["basename"]
@@ -300,4 +307,24 @@ Sub playMovie( movie as Object)
     ' Save the last played position someplace
 
 End Sub
+
+'******************************************************
+'** Check to see if a description file (.txt) exists
+'** and read it into a string.
+'** And if it is missing return ""
+'******************************************************
+Function getDescription( file As Object, url As String, dir As Object )
+    desc = ""
+    if dir.DoesExist(file + ".txt") then
+        print "Retrieving description from ";url+file+".txt"
+        http = CreateObject("roUrlTransfer")
+        http.SetUrl(url+file+".txt")
+        resp = http.GetToString()
+
+        if resp <> invalid then
+            desc = resp
+        end if
+    end if
+    return desc
+End Function
 
