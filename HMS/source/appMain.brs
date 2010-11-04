@@ -12,11 +12,17 @@ Sub Main()
         return
     end if
 
-    if not checkServerUrl(false) then
-        ' Need to show an error to the user here and exit when they click done
-        print "Server URL is invalid"
-        return
-    endif
+    ' Get server url and make sure it is valid
+    valid_dir = false
+    force_edit = false
+    while not valid_dir
+        valid_dir = checkServerUrl(force_edit)
+        dir = getDirectoryListing( "http://"+RegRead("ServerURL") )
+        if dir = invalid then
+            force_edit = true
+            valid_dir = false
+        end if
+    end while
 
     path = []
 

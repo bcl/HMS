@@ -3,14 +3,13 @@
 ' **  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
 ' ********************************************************************
 Function getDirectoryListing(url As String) As Object
-    http = CreateObject("roUrlTransfer")
-    http.SetUrl(url)
-    dir = http.GetToString()
+    result = getHTMLWithTimeout(url, 60)
 
-    if dir = invalid then
-        print "Could not get directory listing"
+    if result.error then
+        print "ERROR: Could not get directory listing"
         return invalid
     end if
+    dir = result.str
 
     ' Try parsing the html as if it is XML
     xml=CreateObject("roXMLElement")

@@ -213,3 +213,40 @@ Function http_post_from_string_with_timeout(val As String, seconds as Integer) a
 
     return str
 End Function
+
+' ********************************************************************
+' ** Get a HTML page with timeout. Gather up error info and return it
+' ********************************************************************
+Function getHTMLWithTimeout(url As String, seconds As Integer) as Object
+    timeout% = 1000 * seconds
+
+    result = { str : "", error : false, response : 0, reason : "" }
+
+    http = CreateObject("roUrlTransfer")
+    http.SetUrl(url)
+    http.SetPort(CreateObject("roMessagePort"))
+    http.EnableFreshConnection(true) 'Don't reuse existing connections
+    if (http.AsyncGetToString())
+        event = wait(timeout%, http.GetPort())
+        if type(event) = "roUrlEvent"
+            if event.GetResponseCode() = 200 then
+                result.str = event.GetString()
+            else
+                result.error = true
+                result.response = event.GetResponseCode()
+                result.reason = event.GetFailureReason()
+            end if
+        elseif event = invalid
+            Dbg("AsyncGetToString timeout")
+            htp.AsyncCancel()
+        else
+            Dbg("AsyncGetToString unknown event", event)
+        endif
+    endif
+
+    print "HTTP result: "
+    print result
+
+    return result
+End Function
+

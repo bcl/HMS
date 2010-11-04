@@ -10,19 +10,19 @@
 ' ** found and write it to the registry.
 '************************************************************
 Function checkServerUrl(forceEdit As Boolean) As Boolean
-    serverURL = RegRead("ServerURL")
-    if (serverURL = invalid) then
-        print "ServerURL not found in the registry"
-        serverURL = "video.local"
-    else if not forceEdit then
-        print "Server set to "; serverURL
+    serverUrl = RegRead("ServerURL")
+    if (serverUrl = invalid) then
+        print "ServerUrl not found in the registry"
+        serverUrl = "video.local"
+    else if not forceEdit and isUrlValid(serverUrl) then
+        print "Server set to "; serverUrl
         return true
-    endif
+    end if
 
     screen = CreateObject("roKeyboardScreen")
     port = CreateObject("roMessagePort")
     screen.SetMessagePort(port)
-    screen.SetTitle("Video Server URL")
+    screen.SetTitle("HMS Video Server URL")
     screen.SetText(serverURL)
     screen.SetDisplayText("Enter Host Name or IP Address")
     screen.SetMaxLength(25)
@@ -38,13 +38,24 @@ Function checkServerUrl(forceEdit As Boolean) As Boolean
             else if msg.isButtonPressed() then
                 print "Evt: ";msg.GetMessage();" idx:"; msg.GetIndex()
                 if msg.GetIndex() = 1 then
-                    searchText = screen.GetText()
-                    print "Server set to "; searchText
-                    RegWrite("ServerURL", searchText)
-                    return true
+                    serverText = screen.GetText()
+                    print "Server set to "; serverText
+
+                    if isUrlValid(serverText) then
+                        RegWrite("ServerURL", serverText)
+                        return true
+                    end if
                 endif
             endif
         endif
     end while
+End Function
+
+'************************************************************
+'** Check a URL to see if it is valid
+'************************************************************
+Function isUrlValid( url As String ) As Boolean
+    result = getHTMLWithTimeout(url, 60)
+    return not result.error
 End Function
 

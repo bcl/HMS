@@ -23,7 +23,6 @@ Function displayDirectory( url As String ) As Object
 
     ' Get the directory listing
     dir = getDirectoryListing(url)
-    print "got listing"
     if dir = invalid then
         print "Failed to get directory listing for";url
         return invalid
