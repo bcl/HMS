@@ -133,7 +133,7 @@ def main():
                         help="(0=SD) 4:3 1=HD 4:3 2=SD 16:9 3=HD 16:9")
     parser.add_option(  "-i", "--interval", dest="interval", type='int', default=10,
                         help="Interval between images in seconds (default is 10)")
-    parser.add_option(  "-o", "--offset", dest="offset", type='int', default=7,
+    parser.add_option(  "-o", "--offset", dest="offset", type='int', default=0,
                         help="Offset to first image in seconds (default is 7)")
 
     (options, args) = parser.parse_args()
