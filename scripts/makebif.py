@@ -1,16 +1,13 @@
 #!/bin/env python
 """
 Create .bif files for Roku video streaming
-Copyright 2009 by Brian C. Lane <bcl@brianlane.com>
+Copyright 2009-2011 by Brian C. Lane <bcl@brianlane.com>
 All Rights Reserved
 
 
 makebif.py --help for arguments
 
 Requires ffmpeg to be in the path
-
-After creating the .bif files run the staticvideo.py script to regenerate XML with the
-URLs for the bif files included.
 
 NOTE: The jpg image sizes are set to the values posted by bbefilms in the Roku
       development forums. They may or may not be correct for your video aspect ratio.
@@ -60,17 +57,17 @@ def getMP4Info(filename):
     return details
 
 
-def extractImages( videoFile, directory, interval, mode=0 ):
+def extractImages( videoFile, directory, interval, mode=0, offset=0 ):
     """
     Extract images from the video at 'interval' seconds
 
     @param mode 0=SD 4:3 1=HD 4:3 2=SD 16:9 3=HD 16:9
     @param directory Directory to write images into
     @param interval interval to extract images at, in seconds
-
+    @param offset offset to first image, in seconds
     """
     size = "x".join([str(i) for i in videoSizes[mode]])
-    cmd = "ffmpeg -i %s -ss 7 -r %0.2f -s %s %s/%%08d.jpg" % (videoFile, interval/100.0, size, directory)
+    cmd = "ffmpeg -i %s -ss %d -r %0.2f -s %s %s/%%08d.jpg" % (videoFile, offset, 1.00/interval, size, directory)
     print cmd
     p = Popen( cmd, shell=True, stdout=PIPE, stdin=PIPE)
     (stdout, stderr) = p.communicate()
@@ -136,9 +133,11 @@ def main():
                         help="(0=SD) 4:3 1=HD 4:3 2=SD 16:9 3=HD 16:9")
     parser.add_option(  "-i", "--interval", dest="interval", type='int', default=10,
                         help="Interval between images in seconds (default is 10)")
+    parser.add_option(  "-o", "--offset", dest="offset", type='int', default=7,
+                        help="Offset to first image in seconds (default is 7)")
 
     (options, args) = parser.parse_args()
-    
+
     # Get the video file to operate on
     videoFile = args[0]
     print "Creating .BIF file for %s" % (videoFile)
@@ -156,13 +155,13 @@ def main():
     tmpDirectory = tempfile.mkdtemp()
 
     # Extract jpg images from the video file
-    extractImages( videoFile, tmpDirectory, options.interval, options.mode )
+    extractImages( videoFile, tmpDirectory, options.interval, options.mode, options.offset )
 
     bifFile = "%s-%s.bif" % (os.path.basename(videoFile).rsplit('.',1)[0], modeExtension[options.mode])
 
     # Create the BIF file
     makeBIF( bifFile, tmpDirectory, options.interval )
-    
+
     # Clean up the temporary directory
     shutil.rmtree(tmpDirectory)
 
