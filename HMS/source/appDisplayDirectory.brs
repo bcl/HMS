@@ -102,25 +102,34 @@ Function displayFiles( files As Object, fileTypes As Object, dirs=false As Boole
 End Function
 
 '******************************************************
+'** Return the URL string to use for the Poster image
+'******************************************************
+Function getPosterUrl( dir as Object, url As String, filename As Object, default As String, extension As String ) As String
+    imageTypes = []
+    imageTypes.Push(".jpg")
+    imageTypes.Push(".png")
+
+    for each i in imageTypes
+        if dir.DoesExist(filename+extension+i) then
+            return url+filename+extension+i
+        end if
+    end for
+    return "pkg:/"+default+extension+".png"
+End Function
+
+'******************************************************
 '** Display a flat-category poster screen of items
 '** return the one selected by the user or nil?
 '******************************************************
 Function showCategories( screen As Object, files As Object, dir as Object, url as String ) As Object
     screen.SetListStyle("flat-category")
 
-    sdImageTypes = []
-    sdImageTypes.Push("-SD.jpg")
-    sdImageTypes.Push("-SD.png")
-    hdImageTypes = []
-    hdImageTypes.Push("-HD.jpg")
-    hdImageTypes.Push("-HD.png")
-
     list = CreateObject("roArray", files.Count(), true)
     o = CreateObject("roAssociativeArray")
     o.ContentType = "episode"
     o.ShortDescriptionLine1 = "Setup"
-    o.SDPosterURL = "pkg://setup-SD.png"
-    o.HDPosterURL = "pkg://setup-HD.png"
+    o.SDPosterURL = getPosterUrl( dir, url, "Setup", "Setup", "-SD" )
+    o.HDPosterURL = getPosterUrl( dir, url, "Setup", "Setup", "-HD" )
     list.Push(o)
 
     for each f in files
@@ -130,22 +139,8 @@ Function showCategories( screen As Object, files As Object, dir as Object, url a
         o.ContentType = "episode"
         o.ShortDescriptionLine1 = f[1]["basename"]
 
-        o.SDPosterUrl = "pkg:/dir-SD.png"
-        o.HDPosterUrl = "pkg:/dir-HD.png"
-        ' poster images in the dir?
-        for each i in sdImageTypes
-            if dir.DoesExist(f[1]["basename"]+i) then
-                o.SDPosterUrl = url + f[1]["basename"] + i
-                exit for
-            end if
-        end for
-
-        for each i in hdImageTypes
-            if dir.DoesExist(f[1]["basename"]+i) then
-                o.HDPosterUrl = url + f[1]["basename"] + i
-                exit for
-            end if
-        end for
+        o.SDPosterUrl = getPosterUrl( dir, url, f[1]["basename"], "dir", "-SD" )
+        o.HDPosterUrl = getPosterUrl( dir, url, f[1]["basename"], "dir", "-HD" )
 
         list.Push(o)
     end for
@@ -184,13 +179,6 @@ Function showVideos( screen As Object, files As Object, dir as Object, url as St
         screen.SetListStyle("arced-portrait")
     end if
 
-    sdImageTypes = []
-    sdImageTypes.Push("-SD.jpg")
-    sdImageTypes.Push("-SD.png")
-    hdImageTypes = []
-    hdImageTypes.Push("-HD.jpg")
-    hdImageTypes.Push("-HD.png")
-
     streamFormat = { mp4 : "mp4", m4v : "mp4", mov : "mp4",
                      wmv : "wmv", hls : "hls"
                    }
@@ -204,22 +192,8 @@ Function showVideos( screen As Object, files As Object, dir as Object, url as St
         o.ContentType = "movie"
         o.ShortDescriptionLine1 = f[1]["basename"]
 
-        o.SDPosterUrl = "pkg:/dir-SD.png"
-        o.HDPosterUrl = "pkg:/dir-HD.png"
-        ' poster images in the dir?
-        for each i in sdImageTypes
-            if dir.DoesExist(f[1]["basename"]+i) then
-                o.SDPosterUrl = url + f[1]["basename"] + i
-                exit for
-            end if
-        end for
-
-        for each i in hdImageTypes
-            if dir.DoesExist(f[1]["basename"]+i) then
-                o.HDPosterUrl = url + f[1]["basename"] + i
-                exit for
-            end if
-        end for
+        o.SDPosterUrl = getPosterUrl( dir, url, f[1]["basename"], "dir", "-SD" )
+        o.HDPosterUrl = getPosterUrl( dir, url, f[1]["basename"], "dir", "-HD" )
 
         if dir.DoesExist(f[1]["basename"]+"-SD.bif") then
             o.SDBifUrl = url+f[1]["basename"]+"-SD.bif"
