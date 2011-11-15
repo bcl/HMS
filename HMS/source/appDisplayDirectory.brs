@@ -76,7 +76,7 @@ Function displayDirectory( url As String ) As Object
     else
         return invalid
     end if
-
+    return ret
 End Function
 
 '******************************************************
