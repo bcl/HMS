@@ -6,7 +6,11 @@ Function getDirectoryListing(url As String) As Object
     result = getHTMLWithTimeout(url, 60)
 
     if result.error then
-        print "ERROR: Could not get directory listing"
+        title = "Directory Listing Error"
+        text  = "There was an error fetching the directory listing."
+        print text
+        ShowErrorDialog(text, title)
+
         return invalid
     end if
     dir = result.str
@@ -14,7 +18,11 @@ Function getDirectoryListing(url As String) As Object
     ' Try parsing the html as if it is XML
     xml=CreateObject("roXMLElement")
     if not xml.Parse(dir) then
-        print "Cannot parse directory listing as XML"
+        title = "Cannot Parse XML"
+        text  = "There was an error parsing the directory listing as XML."
+        print text
+        ShowErrorDialog(text, title)
+
         return invalid
     end if
 
