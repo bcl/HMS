@@ -244,8 +244,8 @@ Function getHTMLWithTimeout(url As String, seconds As Integer) as Object
         endif
     endif
 
-    print "HTTP result: "
-    print result
+'    print "HTTP result: "
+'    print result
 
     return result
 End Function
