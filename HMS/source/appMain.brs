@@ -28,9 +28,9 @@ Sub Main()
 
     done = false
     while not done
-        print path
+        print "path: ";path
         pathString = joinString(path, "/", true, true)
-        print pathString
+        print "pathString: ";pathString
         ret = displayDirectory( "http://"+RegRead("ServerURL")+pathString )
         print "main: ";ret
         print "depth:";path.Count()
@@ -39,6 +39,7 @@ Sub Main()
         else if ret = invalid then
             path.Pop()
         else
+            print "Adding to path: ";ret
             path.Push(ret)
         end if
     end while
