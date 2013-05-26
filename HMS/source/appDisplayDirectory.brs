@@ -71,7 +71,6 @@ Function displayDirectory( url As String ) As Object
     grid.Show()
     while true
         msg = wait(30000, port)
-        print type(msg)
         if type(msg) = "roGridScreenEvent" then
             if msg.isScreenClosed() then
                 return -1
@@ -183,10 +182,19 @@ Function showTimeBreadcrumb(screen As Object)
         minutes = tostr(minutes)
     end if
     bc = now.AsDateStringNoParam()+" "+hour+":"+minutes+ampm
-    print "Time is now ";bc
     screen.SetBreadcrumbText(bc, "")
 End Function
 
+' Get the last position for the movie
+Function getLastPosition(movie As Object) As Integer
+    ' use movie.Title as the filename
+    lastPos = ReadAsciiFile("tmp:/"+movie.Title)
+    print "Last position of ";movie.Title;" is ";lastPos
+    if lastPos <> "" then
+        return strtoi(lastPos)
+    end if
+    return 0
+End Function
 
 '******************************************************
 '** Show the contents of url
@@ -437,7 +445,9 @@ Sub playMovie(movie as Object)
     p = CreateObject("roMessagePort")
     video = CreateObject("roVideoScreen")
     video.setMessagePort(p)
+    video.SetPositionNotificationPeriod(15)
 
+    movie.PlayStart = getLastPosition(movie)
     video.SetContent(movie)
     video.show()
 
@@ -446,20 +456,19 @@ Sub playMovie(movie as Object)
         msg = wait(0, video.GetMessagePort())
         if type(msg) = "roVideoScreenEvent"
             if msg.isScreenClosed() then 'ScreenClosed event
-                print "Closing video screen"
                 exit while
             else if msg.isPlaybackPosition() then
                 lastPos = msg.GetIndex()
-            else if msg.isRequestFailed()
+                WriteAsciiFile("tmp:/"+movie.Title, tostr(lastPos))
+            else if msg.isfullresult() then
+                DeleteFile("tmp:/"+movie.Title)
+            else if msg.isRequestFailed() then
                 print "play failed: "; msg.GetMessage()
             else
                 print "Unknown event: "; msg.GetType(); " msg: "; msg.GetMessage()
             end if
         end if
     end while
-
-    ' Save the last played position someplace
-
 End Sub
 
 '******************************************************
