@@ -124,15 +124,15 @@ Function MovieObject(file As Object, url As String, listing as Object) As Object
     ' Search for SD & HD images and .bif files
     for i = 0 to listing.Count()-1
         if Instr(1, listing[i], file[1]["basename"]) = 1 then
-            if fileEndsWith(listing[i], ["-SD.png", "-SD.jpg"]) then
+            if fileEndsWith(file[1]["basename"], listing[i], ["-SD.png", "-SD.jpg"]) then
                 o.SDPosterUrl = url+listing[i]
-            else if fileEndsWith(listing[i], ["-HD.png", "-HD.jpg"]) then
+            else if fileEndsWith(file[1]["basename"], listing[i], ["-HD.png", "-HD.jpg"]) then
                 o.HDPosterUrl = url+listing[i]
-            else if fileEndsWith(listing[i], ["-SD.bif"]) then
+            else if fileEndsWith(file[1]["basename"], listing[i], ["-SD.bif"]) then
                 o.SDBifUrl = url+listing[i]
-            else if fileEndsWith(listing[i], ["-HD.bif"]) then
+            else if fileEndsWith(file[1]["basename"], listing[i], ["-HD.bif"]) then
                 o.HDBifUrl = url+listing[i]
-            else if fileEndsWith(listing[i], [".txt"]) then
+            else if fileEndsWith(file[1]["basename"], listing[i], [".txt"]) then
                 o.Description = getDescription(url+listing[i])
             end if
         end if
@@ -297,9 +297,9 @@ End Function
 '**************************************************************
 '** Return true if the filename ends with any of the extensions
 '**************************************************************
-Function fileEndsWith(filename As Object, extensions As Object) As Boolean
+Function fileEndsWith(basename As String, filename As String, extensions As Object) As Boolean
     for each e in extensions
-        if Right(filename, Len(e)) = e
+        if basename+e = filename
             return true
         end if
     end for
