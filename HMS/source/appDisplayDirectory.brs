@@ -34,6 +34,10 @@ Function displayDirectory( url As String ) As Object
     grid.SetupLists(titles.Count())
     grid.SetListNames(titles)
 
+    ' run the grid
+    showTimeBreadcrumb(grid)
+    grid.Show()
+
     ' Hold all the movie objects
     screen = CreateObject("roArray", categories.Count(), false)
     ' Setup each category's list
@@ -67,9 +71,6 @@ Function displayDirectory( url As String ) As Object
         end if
     end for
 
-    ' run the grid
-    showTimeBreadcrumb(grid)
-    grid.Show()
     while true
         msg = wait(30000, port)
         if type(msg) = "roGridScreenEvent" then
