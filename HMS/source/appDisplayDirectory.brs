@@ -12,6 +12,7 @@ Function displayDirectory( url As String ) As Object
     port=CreateObject("roMessagePort")
     grid = CreateObject("roGridScreen")
     grid.SetMessagePort(port)
+    grid.SetDisplayMode("scale-to-fit")
 
     ' Build list of Category Names from the top level directories
     listing = getDirectoryListing(url)
