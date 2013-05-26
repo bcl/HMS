@@ -120,8 +120,8 @@ Function MovieObject(file As Object, url As String, listing as Object) As Object
     o.ShortDescriptionLine1 = file[1]["basename"]
 
     ' Default images
-    o.SDPosterUrl = "pkg:/dir-SD.png"
-    o.HDPosterUrl = "pkg:/dir-HD.png"
+    o.SDPosterUrl = url+"default-SD.png"
+    o.HDPosterUrl = url+"default-HD.png"
 
     ' Search for SD & HD images and .bif files
     for i = 0 to listing.Count()-1
