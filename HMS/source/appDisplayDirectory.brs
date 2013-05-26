@@ -67,9 +67,10 @@ Function displayDirectory( url As String ) As Object
     end for
 
     ' run the grid
+    showTimeBreadcrumb(grid)
     grid.Show()
     while true
-        msg = wait(0, port)
+        msg = wait(30000, port)
         print type(msg)
         if type(msg) = "roGridScreenEvent" then
             if msg.isScreenClosed() then
@@ -83,6 +84,8 @@ Function displayDirectory( url As String ) As Object
 
                 playMovie(screen[msg.GetIndex()][msg.GetData()])
             endif
+        else if msg = invalid then
+            showTimeBreadcrumb(grid)
         endif
     end while
 End Function
@@ -157,6 +160,31 @@ Function MovieObject(file As Object, url As String, listing as Object) As Object
     end if
 
     return o
+End Function
+
+' Set breadcrumb to current time
+Function showTimeBreadcrumb(screen As Object)
+    now = CreateObject("roDateTime")
+    now.ToLocalTime()
+    hour = now.GetHours()
+    if hour < 12 then
+        ampm = " AM"
+    else
+        ampm = " PM"
+        if hour > 12 then
+            hour = hour - 12
+        end if
+    end if
+    hour = tostr(hour)
+    minutes = now.GetMinutes()
+    if minutes < 10 then
+        minutes = "0"+tostr(minutes)
+    else
+        minutes = tostr(minutes)
+    end if
+    bc = now.AsDateStringNoParam()+" "+hour+":"+minutes+ampm
+    print "Time is now ";bc
+    screen.SetBreadcrumbText(bc, "")
 End Function
 
 
