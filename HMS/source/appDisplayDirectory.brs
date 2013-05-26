@@ -1,12 +1,169 @@
 '********************************************************************
 '**  Home Media Server Application - Main
-'**  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
+'**  Copyright (c) 2010-2013 Brian C. Lane All Rights Reserved.
 '********************************************************************
+
+'******************************************************
+' Display a scrolling grid of everything on the server
+'******************************************************
+Function displayDirectory( url As String ) As Object
+    print "url: ";url
+
+    port=CreateObject("roMessagePort")
+    grid = CreateObject("roGridScreen")
+    grid.SetMessagePort(port)
+
+    ' Build list of Category Names from the top level directories
+    listing = getDirectoryListing(url)
+    if listing = invalid then
+        print "Failed to get directory listing for ";url
+        return invalid
+    end if
+    categories = displayFiles(listing, {}, true)
+    Sort(categories, function(k)
+                       return LCase(k[0])
+                     end function)
+
+    ' Setup Grid with categories
+    titles = CreateObject("roArray", categories.Count(), false)
+    for i = 0 to categories.Count()-1
+        print "Category: :";categories[i][0]
+        titles.Push(getLastElement(categories[i][0]))
+    end for
+    grid.SetupLists(titles.Count())
+    grid.SetListNames(titles)
+
+    ' Hold all the movie objects
+    screen = CreateObject("roArray", categories.Count(), false)
+    ' Setup each category's list
+    for i = 0 to categories.Count()-1
+        cat_url = url + "/" + categories[i][0]
+        listing = getDirectoryListing(cat_url)
+        ' What kind of directory is this?
+        dirType = directoryType(listing)
+        if dirType = 1 then
+            displayList  = displayFiles(listing, { jpg : true })
+        else if dirType = 2 then
+            displayList = displayFiles(listing, { mp3 : true })
+        else if dirType = 3 then
+            displayList = displayFiles(listing, { mp4 : true, m4v : true, mov : true, wmv : true } )
+        else if dirType = 4 then
+            displayList = displayFiles(listing, { mp4 : true, m4v : true, mov : true, wmv : true } )
+        end if
+        if dirType <> 0 then
+            Sort(displayList, function(k)
+                               return LCase(k[0])
+                             end function)
+            list = CreateObject("roArray", displayList.Count(), false)
+            for j = 0 to displayList.Count()-1
+                list.Push(MovieObject(displayList[j], cat_url, listing))
+            end for
+            grid.SetContentList(i, list)
+            screen.Push(list)
+        else
+            grid.SetContentList(i, [])
+            screen.Push([])
+        end if
+    end for
+
+    ' run the grid
+    grid.Show()
+    while true
+        msg = wait(0, port)
+        print type(msg)
+        if type(msg) = "roGridScreenEvent" then
+            if msg.isScreenClosed() then
+                return -1
+            elseif msg.isListItemFocused()
+                print "Focused msg: ";msg.GetMessage();"row: ";msg.GetIndex();
+                print " col: ";msg.GetData()
+            elseif msg.isListItemSelected()
+                print "Selected msg: ";msg.GetMessage();"row: ";msg.GetIndex();
+                print " col: ";msg.GetData()
+
+                playMovie(screen[msg.GetIndex()][msg.GetData()])
+            endif
+        endif
+    end while
+End Function
+
+' Put this into utils
+Function getLastElement(url As String) As String
+    ' Get last element of URL
+    toks = url.tokenize("/")
+    return toks[toks.Count()-1]
+End Function
+
+Function directoryType(listing As Object) As Integer
+    for i = 0 to listing.Count()-1
+        if listing[i] = "photos" then
+            return 1
+        else if listing[i] = "songs" then
+            return 2
+        else if listing[i] = "episodes" then
+            return 3
+        else if listing[i] = "movies" then
+            return 4
+        end if
+    end for
+    return 0
+End Function
+
+
+Function MovieObject(file As Object, url As String, listing as Object) As Object
+    o = CreateObject("roAssociativeArray")
+    o.ContentType = "movie"
+    o.ShortDescriptionLine1 = file[1]["basename"]
+
+    ' Default images
+    o.SDPosterUrl = "pkg:/dir-SD.png"
+    o.HDPosterUrl = "pkg:/dir-HD.png"
+
+    ' Search for SD & HD images and .bif files
+    for i = 0 to listing.Count()-1
+        if Instr(1, listing[i], file[1]["basename"]) = 1 then
+            if fileEndsWith(listing[i], ["-SD.png", "-SD.jpg"]) then
+                o.SDPosterUrl = url+listing[i]
+            else if fileEndsWith(listing[i], ["-HD.png", "-HD.jpg"]) then
+                o.HDPosterUrl = url+listing[i]
+            else if fileEndsWith(listing[i], ["-SD.bif"]) then
+                o.SDBifUrl = url+listing[i]
+            else if fileEndsWith(listing[i], ["-HD.bif"]) then
+                o.HDBifUrl = url+listing[i]
+            else if fileEndsWith(listing[i], [".txt"]) then
+                o.Description = getDescription(url+listing[i])
+            end if
+        end if
+    end for
+    o.IsHD = false
+    o.HDBranded = false
+    o.Rating = "NR"
+    o.StarRating = 100
+    o.Title = file[1]["basename"]
+    o.Length = 0
+
+    ' Video related stuff (can I put this all in the same object?)
+    o.StreamBitrates = [0]
+    o.StreamUrls = [url + file[0]]
+    o.StreamQualities = ["SD"]
+
+    streamFormat = { mp4 : "mp4", m4v : "mp4", mov : "mp4",
+                     wmv : "wmv", hls : "hls"
+                   }
+    if streamFormat.DoesExist(file[1]["extension"].Mid(1)) then
+        o.StreamFormat = streamFormat[file[1]["extension"].Mid(1)]
+    else
+        o.StreamFormat = ["mp4"]
+    end if
+
+    return o
+End Function
+
 
 '******************************************************
 '** Show the contents of url
 '******************************************************
-Function displayDirectory( url As String ) As Object
+Function displayDirectoryOld( url As String ) As Object
     print "url: ";url
 
     port=CreateObject("roMessagePort")
@@ -101,20 +258,16 @@ Function displayFiles( files As Object, fileTypes As Object, dirs=false As Boole
     return list
 End Function
 
-'******************************************************
-'** Return the URL string to use for the Poster image
-'******************************************************
-Function getPosterUrl( dir as Object, url As String, filename As Object, default As String, extension As String ) As String
-    imageTypes = []
-    imageTypes.Push(".jpg")
-    imageTypes.Push(".png")
-
-    for each i in imageTypes
-        if dir.DoesExist(filename+extension+i) then
-            return url+filename+extension+i
+'**************************************************************
+'** Return true if the filename ends with any of the extensions
+'**************************************************************
+Function fileEndsWith(filename As Object, extensions As Object) As Boolean
+    for each e in extensions
+        if Right(filename, Len(e)) = e
+            return true
         end if
     end for
-    return "pkg:/"+default+extension+".png"
+    return false
 End Function
 
 '******************************************************
@@ -128,8 +281,8 @@ Function showCategories( screen As Object, files As Object, dir as Object, url a
     o = CreateObject("roAssociativeArray")
     o.ContentType = "episode"
     o.ShortDescriptionLine1 = "Setup"
-    o.SDPosterURL = getPosterUrl( dir, url, "Setup", "Setup", "-SD" )
-    o.HDPosterURL = getPosterUrl( dir, url, "Setup", "Setup", "-HD" )
+'    o.SDPosterURL = getPosterUrl( dir, url, "Setup", "Setup", "-SD" )
+'    o.HDPosterURL = getPosterUrl( dir, url, "Setup", "Setup", "-HD" )
     list.Push(o)
 
     for each f in files
@@ -252,7 +405,7 @@ End Function
 '** Play the video using the data from the movie
 '** metadata object passed to it
 '******************************************************
-Sub playMovie( movie as Object)
+Sub playMovie(movie as Object)
     p = CreateObject("roMessagePort")
     video = CreateObject("roVideoScreen")
     video.setMessagePort(p)
@@ -286,18 +439,15 @@ End Sub
 '** and read it into a string.
 '** And if it is missing return ""
 '******************************************************
-Function getDescription( file As Object, url As String, dir As Object )
-    desc = ""
-    if dir.DoesExist(file + ".txt") then
-        print "Retrieving description from ";url+file+".txt"
-        http = CreateObject("roUrlTransfer")
-        http.SetUrl(url+file+".txt")
-        resp = http.GetToString()
+Function getDescription(url As String)
+    print "Retrieving description from ";url
+    http = CreateObject("roUrlTransfer")
+    http.SetUrl(url)
+    resp = http.GetToString()
 
-        if resp <> invalid then
-            desc = resp
-        end if
+    if resp <> invalid then
+        return resp
     end if
-    return desc
+    return ""
 End Function
 

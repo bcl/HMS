@@ -1,7 +1,6 @@
 '*****************************************************************
-'**  Home Media Server Application -- Home Screen
-'**  November 2010
-'**  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
+'**  Home Media Server Application
+'**  Copyright (c) 2010-2013 Brian C. Lane All Rights Reserved.
 '*****************************************************************
 
 '************************************************************

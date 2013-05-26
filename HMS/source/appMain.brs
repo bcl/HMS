@@ -1,6 +1,6 @@
 '********************************************************************
 '**  Home Media Server Application - Main
-'**  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
+'**  Copyright (c) 2010-2013 Brian C. Lane All Rights Reserved.
 '********************************************************************
 Sub Main()
     'initialize theme attributes like titles, logos and overhang color
@@ -24,25 +24,7 @@ Sub Main()
         end if
     end while
 
-    path = []
-
-    done = false
-    while not done
-        print "path: ";path
-        pathString = joinString(path, "/", true, true)
-        print "pathString: ";pathString
-        ret = displayDirectory( "http://"+RegRead("ServerURL")+pathString )
-        print "main: ";ret
-        print "depth:";path.Count()
-        if ret = invalid and path.Count() = 0 then
-            done = true
-        else if ret = invalid then
-            path.Pop()
-        else
-            print "Adding to path: ";ret
-            path.Push(ret)
-        end if
-    end while
+    displayDirectory("http://"+RegRead("ServerURL"))
 End Sub
 
 
