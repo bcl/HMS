@@ -47,10 +47,17 @@ Function displayDirectory( url As String ) As Object
     grid.SetFocusedListitem(0, 1)
     grid.Show()
 
+    loadingDialog = ShowPleaseWait("Loading Movies...", "")
+    total = 0
     ' Setup each category's list
     for i = 0 to categories.Count()-1
         cat_url = url + "/" + categories[i][0]
         listing = getDirectoryListing(cat_url)
+        listing_hash = CreateObject("roAssociativeArray")
+        for each f in listing
+            listing_hash.AddReplace(f, "")
+        end for
+
         ' What kind of directory is this?
         dirType = directoryType(listing)
         if dirType = 1 then
@@ -62,13 +69,16 @@ Function displayDirectory( url As String ) As Object
         else if dirType = 4 then
             displayList = displayFiles(listing, { mp4 : true, m4v : true, mov : true, wmv : true } )
         end if
+
+        total = total + displayList.Count()
+        loadingDialog.SetTitle("Loading Movie #"+Stri(total))
         if dirType <> 0 then
             Sort(displayList, function(k)
                                return LCase(k[0])
                              end function)
             list = CreateObject("roArray", displayList.Count(), false)
             for j = 0 to displayList.Count()-1
-                list.Push(MovieObject(displayList[j], cat_url, listing))
+                list.Push(MovieObject(displayList[j], cat_url, listing_hash))
             end for
             grid.SetContentList(1+i, list)
             screen.Push(list)
@@ -77,6 +87,7 @@ Function displayDirectory( url As String ) As Object
             screen.Push([])
         end if
     end for
+    loadingDialog.Close()
 
     while true
         msg = wait(30000, port)
@@ -160,7 +171,7 @@ Function directoryType(listing As Object) As Integer
 End Function
 
 
-Function MovieObject(file As Object, url As String, listing as Object) As Object
+Function MovieObject(file As Object, url As String, listing_hash as Object) As Object
     o = CreateObject("roAssociativeArray")
     o.ContentType = "movie"
     o.ShortDescriptionLine1 = file[1]["basename"]
@@ -170,21 +181,21 @@ Function MovieObject(file As Object, url As String, listing as Object) As Object
     o.HDPosterUrl = url+"default-HD.png"
 
     ' Search for SD & HD images and .bif files
-    for i = 0 to listing.Count()-1
-        if Instr(1, listing[i], file[1]["basename"]) = 1 then
-            if fileEndsWith(file[1]["basename"], listing[i], ["-SD.png", "-SD.jpg"]) then
-                o.SDPosterUrl = url+listing[i]
-            else if fileEndsWith(file[1]["basename"], listing[i], ["-HD.png", "-HD.jpg"]) then
-                o.HDPosterUrl = url+listing[i]
-            else if fileEndsWith(file[1]["basename"], listing[i], ["-SD.bif"]) then
-                o.SDBifUrl = url+listing[i]
-            else if fileEndsWith(file[1]["basename"], listing[i], ["-HD.bif"]) then
-                o.HDBifUrl = url+listing[i]
-            else if fileEndsWith(file[1]["basename"], listing[i], [".txt"]) then
-                o.Description = getDescription(url+listing[i])
-            end if
-        end if
-    end for
+    if listing_hash.DoesExist(file[1]["basename"]+"-SD.png") then
+        o.SDPosterUrl = url+file[1]["basename"]+"-SD.png"
+    else if listing_hash.DoesExist(file[1]["basename"]+"-SD.jpg") then
+        o.SDPosterUrl = url+file[1]["basename"]+"-SD.jpg"
+    else if listing_hash.DoesExist(file[1]["basename"]+"-HD.png") then
+        o.HDPosterUrl = url+file[1]["basename"]+"-HD.png"
+    else if listing_hash.DoesExist(file[1]["basename"]+"-HD.jpg") then
+        o.HDPosterUrl = url+file[1]["basename"]+"-HD.jpg"
+    else if listing_hash.DoesExist(file[1]["basename"]+"-SD.bif") then
+        o.SDBifUrl = url+file[1]["basename"]+"-SD.bif"
+    else if listing_hash.DoesExist(file[1]["basename"]+"-HD.bif") then
+        o.HDBifUrl = url+file[1]["basename"]+"-HD.bif"
+    else if listing_hash.DoesExist(file[1]["basename"]+".txt") then
+        o.Description = getDescription(url+file[1]["basename"]+".txt")
+    end if
     o.IsHD = false
     o.HDBranded = false
     o.Rating = "NR"
