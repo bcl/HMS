@@ -27,6 +27,7 @@ Function displayDirectory( url As String ) As Object
 
     ' Setup Grid with categories
     titles = CreateObject("roArray", categories.Count(), false)
+    titles.Push("Search")
     for i = 0 to categories.Count()-1
         print "Category: :";categories[i][0]
         titles.Push(getLastElement(categories[i][0]))
@@ -34,12 +35,32 @@ Function displayDirectory( url As String ) As Object
     grid.SetupLists(titles.Count())
     grid.SetListNames(titles)
 
+    ' Hold all the movie objects
+    screen = CreateObject("roArray", categories.Count(), false)
+
+    ' Setup the Search/Setup entries for first row
+    search = CreateObject("roArray", 2, true)
+    o = CreateObject("roAssociativeArray")
+    o.ContentType = "episode"
+    o.Title = "Setup"
+    o.SDPosterUrl = url+"/Setup-SD.png"
+    o.HDPosterUrl = url+"/Setup-HD.png"
+    search.Push(o)
+
+    o = CreateObject("roAssociativeArray")
+    o.ContentType = "episode"
+    o.Title = "Search"
+    o.SDPosterUrl = url+"/Search-SD.png"
+    o.HDPosterUrl = url+"/Search-HD.png"
+    search.Push(o)
+    ' Add as first row
+    grid.SetContentList(0, search)
+    screen.Push(search)
+
     ' run the grid
     showTimeBreadcrumb(grid)
     grid.Show()
 
-    ' Hold all the movie objects
-    screen = CreateObject("roArray", categories.Count(), false)
     ' Setup each category's list
     for i = 0 to categories.Count()-1
         cat_url = url + "/" + categories[i][0]
@@ -63,10 +84,10 @@ Function displayDirectory( url As String ) As Object
             for j = 0 to displayList.Count()-1
                 list.Push(MovieObject(displayList[j], cat_url, listing))
             end for
-            grid.SetContentList(i, list)
+            grid.SetContentList(1+i, list)
             screen.Push(list)
         else
-            grid.SetContentList(i, [])
+            grid.SetContentList(1+i, [])
             screen.Push([])
         end if
     end for
@@ -83,7 +104,17 @@ Function displayDirectory( url As String ) As Object
                 print "Selected msg: ";msg.GetMessage();"row: ";msg.GetIndex();
                 print " col: ";msg.GetData()
 
-                playMovie(screen[msg.GetIndex()][msg.GetData()])
+                ' Is this the Search option?
+
+                ' Is this the Setup option?
+                if msg.GetIndex() = 0 and msg.GetData() = 0 then
+                    checkServerUrl(true)
+                else if msg.GetIndex() = 0 and msg.GetData() = 1 then
+'                    searchScreen(screen)
+                    print "Search Selected"
+                else
+                    playMovie(screen[msg.GetIndex()][msg.GetData()])
+                end if
             endif
         else if msg = invalid then
             showTimeBreadcrumb(grid)
