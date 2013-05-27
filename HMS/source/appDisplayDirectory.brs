@@ -38,27 +38,13 @@ Function displayDirectory( url As String ) As Object
     ' Hold all the movie objects
     screen = CreateObject("roArray", categories.Count(), false)
 
-    ' Setup the Search/Setup entries for first row
-    search = CreateObject("roArray", 2, true)
-    o = CreateObject("roAssociativeArray")
-    o.ContentType = "episode"
-    o.Title = "Setup"
-    o.SDPosterUrl = url+"/Setup-SD.png"
-    o.HDPosterUrl = url+"/Setup-HD.png"
-    search.Push(o)
-
-    o = CreateObject("roAssociativeArray")
-    o.ContentType = "episode"
-    o.Title = "Search"
-    o.SDPosterUrl = url+"/Search-SD.png"
-    o.HDPosterUrl = url+"/Search-HD.png"
-    search.Push(o)
-    ' Add as first row
-    grid.SetContentList(0, search)
+    ' Add as utility row
+    grid.SetContentList(0, getUtilRow(url))
     screen.Push(search)
 
     ' run the grid
     showTimeBreadcrumb(grid)
+    grid.SetFocusedListitem(0, 1)
     grid.Show()
 
     ' Setup each category's list
@@ -104,14 +90,20 @@ Function displayDirectory( url As String ) As Object
                 print "Selected msg: ";msg.GetMessage();"row: ";msg.GetIndex();
                 print " col: ";msg.GetData()
 
-                ' Is this the Search option?
-
-                ' Is this the Setup option?
                 if msg.GetIndex() = 0 and msg.GetData() = 0 then
                     checkServerUrl(true)
                 else if msg.GetIndex() = 0 and msg.GetData() = 1 then
-'                    searchScreen(screen)
-                    print "Search Selected"
+                    ' search returns a roArray of MovieObjects
+                    results = searchScreen(screen)
+
+                    ' Make a new search rot
+                    searchRow = getUtilRow(url)
+                    searchRow.Append(results)
+                    ' Remove the old one and add the new one, selecting first result
+                    screen.Shift()
+                    screen.Unshift(searchRow)
+                    grid.SetContentList(0, searchRow)
+                    grid.SetFocusedListitem(0, 2)
                 else
                     playMovie(screen[msg.GetIndex()][msg.GetData()])
                 end if
@@ -121,6 +113,29 @@ Function displayDirectory( url As String ) As Object
         endif
     end while
 End Function
+
+
+' Get the utility row (Search, Setup)
+Function getUtilRow(url As String) As Object
+    ' Setup the Search/Setup entries for first row
+    search = CreateObject("roArray", 2, true)
+    o = CreateObject("roAssociativeArray")
+    o.ContentType = "episode"
+    o.Title = "Setup"
+    o.SDPosterUrl = url+"/Setup-SD.png"
+    o.HDPosterUrl = url+"/Setup-HD.png"
+    search.Push(o)
+
+    o = CreateObject("roAssociativeArray")
+    o.ContentType = "episode"
+    o.Title = "Search"
+    o.SDPosterUrl = url+"/Search-SD.png"
+    o.HDPosterUrl = url+"/Search-HD.png"
+    search.Push(o)
+
+    return search
+End Function
+
 
 ' Put this into utils
 Function getLastElement(url As String) As String
