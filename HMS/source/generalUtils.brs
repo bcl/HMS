@@ -677,3 +677,12 @@ Function joinString(list as Object, j as String, first=false, last=false) As Str
     return str
 End Function
 
+'********************************************
+' Return the last part of a / separated path
+'********************************************
+Function getLastElement(url As String) As String
+    ' Get last element of URL
+    toks = url.tokenize("/")
+    return toks[toks.Count()-1]
+End Function
+

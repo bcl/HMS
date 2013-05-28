@@ -1,10 +1,10 @@
 '********************************************************************
 '**  Home Media Server Application - Main
-'**  Copyright (c) 2010-2013 Brian C. Lane All Rights Reserved.
+'**  Copyright (c) 2013 Brian C. Lane All Rights Reserved.
 '********************************************************************
 
 '********************************************************************
-' Display search string
+'** Display search string
 '********************************************************************
 Function searchScreen(screenItems As Object) As Object
 ' screenItems is the double roArray of the screen objects. First row is the
@@ -12,7 +12,7 @@ Function searchScreen(screenItems As Object) As Object
 
     port = CreateObject("roMessagePort")
     screen = CreateObject("roSearchScreen")
-    screen.SetMessagePort(port) 
+    screen.SetMessagePort(port)
     screen.SetSearchTermHeaderText("Suggestions:")
     screen.SetSearchButtonText("search")
     screen.SetClearButtonEnabled(false)
@@ -41,7 +41,7 @@ Function searchScreen(screenItems As Object) As Object
 End Function
 
 '********************************************************************
-' Return an array of suggested movies objects
+'** Return an array of suggested movies objects
 '********************************************************************
 Function getSuggestions(items As Object, needle As String) As Object
     suggestions = CreateObject("roArray", 10, true)
@@ -60,7 +60,7 @@ Function getSuggestions(items As Object, needle As String) As Object
 End Function
 
 '********************************************************************
-' Return an array of titles
+'** Return an array of titles
 '********************************************************************
 Function getTitles(movies As Object) As Object
     titles = CreateObject("roArray", 10, true)

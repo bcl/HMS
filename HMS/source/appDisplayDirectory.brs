@@ -4,7 +4,7 @@
 '********************************************************************
 
 '******************************************************
-' Display a scrolling grid of everything on the server
+'** Display a scrolling grid of everything on the server
 '******************************************************
 Function displayDirectory( url As String ) As Object
     print "url: ";url
@@ -43,7 +43,7 @@ Function displayDirectory( url As String ) As Object
     screen.Push(search)
 
     ' run the grid
-    showTimeBreadcrumb(grid)
+    showTimeBreadcrumb(grid, true)
     grid.SetFocusedListitem(0, 1)
     grid.Show()
 
@@ -59,7 +59,7 @@ Function displayDirectory( url As String ) As Object
         end for
 
         ' What kind of directory is this?
-        dirType = directoryType(listing)
+        dirType = directoryType(listing_hash)
         if dirType = 1 then
             displayList  = displayFiles(listing, { jpg : true })
         else if dirType = 2 then
@@ -120,13 +120,15 @@ Function displayDirectory( url As String ) As Object
                 end if
             endif
         else if msg = invalid then
-            showTimeBreadcrumb(grid)
+            showTimeBreadcrumb(grid, true)
         endif
     end while
 End Function
 
 
-' Get the utility row (Search, Setup)
+'*************************************
+'** Get the utility row (Setup, Search)
+'*************************************
 Function getUtilRow(url As String) As Object
     ' Setup the Search/Setup entries for first row
     search = CreateObject("roArray", 2, true)
@@ -147,30 +149,26 @@ Function getUtilRow(url As String) As Object
     return search
 End Function
 
-
-' Put this into utils
-Function getLastElement(url As String) As String
-    ' Get last element of URL
-    toks = url.tokenize("/")
-    return toks[toks.Count()-1]
-End Function
-
-Function directoryType(listing As Object) As Integer
-    for i = 0 to listing.Count()-1
-        if listing[i] = "photos" then
-            return 1
-        else if listing[i] = "songs" then
-            return 2
-        else if listing[i] = "episodes" then
-            return 3
-        else if listing[i] = "movies" then
-            return 4
-        end if
-    end for
+'**********************************
+'** Return the type of the directory
+'**********************************
+Function directoryType(listing_hash As Object) As Integer
+    if listing_hash.DoesExist("photos") then
+        return 1
+    else if listing_hash.DoesExist("songs") then
+        return 2
+    else if listing_hash.DoesExist("episodes") then
+        return 3
+    else if listing_hash.DoesExist("movies") then
+        return 4
+    end if
     return 0
 End Function
 
 
+'******************************************
+'** Create an object with the movie metadata
+'******************************************
 Function MovieObject(file As Object, url As String, listing_hash as Object) As Object
     o = CreateObject("roAssociativeArray")
     o.ContentType = "movie"
@@ -220,17 +218,21 @@ Function MovieObject(file As Object, url As String, listing_hash as Object) As O
     return o
 End Function
 
-' Set breadcrumb to current time
-Function showTimeBreadcrumb(screen As Object)
+'********************************
+'** Set breadcrumb to current time
+'********************************
+Function showTimeBreadcrumb(screen As Object, use_ampm As Boolean)
     now = CreateObject("roDateTime")
     now.ToLocalTime()
     hour = now.GetHours()
-    if hour < 12 then
-        ampm = " AM"
-    else
-        ampm = " PM"
-        if hour > 12 then
-            hour = hour - 12
+    if use_ampm then
+        if hour < 12 then
+            ampm = " AM"
+        else
+            ampm = " PM"
+            if hour > 12 then
+                hour = hour - 12
+            end if
         end if
     end if
     hour = tostr(hour)
@@ -244,7 +246,9 @@ Function showTimeBreadcrumb(screen As Object)
     screen.SetBreadcrumbText(bc, "")
 End Function
 
-' Get the last position for the movie
+'*************************************
+'** Get the last position for the movie
+'*************************************
 Function getLastPosition(movie As Object) As Integer
     ' use movie.Title as the filename
     lastPos = ReadAsciiFile("tmp:/"+movie.Title)
@@ -253,82 +257,6 @@ Function getLastPosition(movie As Object) As Integer
         return strtoi(lastPos)
     end if
     return 0
-End Function
-
-'******************************************************
-'** Show the contents of url
-'******************************************************
-Function displayDirectoryOld( url As String ) As Object
-    print "url: ";url
-
-    port=CreateObject("roMessagePort")
-    screen = CreateObject("roPosterScreen")
-    screen.SetMessagePort(port)
-    screen.SetListDisplayMode("zoom-to-fill")
-
-    ' Get last element of URL to use as a breadcrumb
-    toks = url.tokenize("/")
-    bc1 = ""
-    bc2 = toks[toks.Count()-1]
-    screen.SetBreadcrumbText(bc1, bc2)
-    screen.Show()
-
-    ' Get the directory listing
-    dir = getDirectoryListing(url)
-    if dir = invalid then
-        print "Failed to get directory listing for";url
-        return invalid
-    end if
-
-    ' Figure out what kind of directory this is
-    ' dirs(0) - default, photos(1), songs(2), episodes(3), movies(4)
-    if dir.DoesExist("photos") then
-        dirType = 1
-        displayList  = displayFiles(dir, { jpg : true })
-    else if dir.DoesExist("songs") then
-        dirType = 2
-        displayList = displayFiles(dir, { mp3 : true })
-    else if dir.DoesExist("episodes") then
-        dirType = 3
-        displayList = displayFiles(dir, { mp4 : true, m4v : true, mov : true, wmv : true } )
-    else if dir.DoesExist("movies") then
-        dirType = 4
-        displayList = displayFiles(dir, { mp4 : true, m4v : true, mov : true, wmv : true } )
-    else
-        dirType = 0
-        displayList = displayFiles(dir, {}, true)
-    end if
-
-    ' Sort the list, case-insensitive
-    Sort( displayList, function(k)
-                           return LCase(k[0])
-                       end function)
-
-'    print "dirType: ";dirType
-'    for each f in displayList
-'        print f[0]
-'        print f[1]
-'    end for
-
-    if displayList.Count() = 0 then
-        return invalid
-    end if
-
-    if dirType = 0 then
-        ret = showCategories( screen, displayList, dir, url )
-        if ret <> invalid then
-            return ret[1]["basename"]
-        else
-            return invalid
-        end if
-    else if dirType = 3 then
-        ret = showVideos( screen, displayList, dir, url, true)
-    else if dirType = 4 then
-        ret = showVideos( screen, displayList, dir, url, false )
-    else
-        return invalid
-    end if
-    return ret
 End Function
 
 '******************************************************
@@ -352,149 +280,6 @@ Function displayFiles( files As Object, fileTypes As Object, dirs=false As Boole
 
     return list
 End Function
-
-'**************************************************************
-'** Return true if the filename ends with any of the extensions
-'**************************************************************
-Function fileEndsWith(basename As String, filename As String, extensions As Object) As Boolean
-    for each e in extensions
-        if basename+e = filename
-            return true
-        end if
-    end for
-    return false
-End Function
-
-'******************************************************
-'** Display a flat-category poster screen of items
-'** return the one selected by the user or nil?
-'******************************************************
-Function showCategories( screen As Object, files As Object, dir as Object, url as String ) As Object
-    screen.SetListStyle("flat-category")
-
-    list = CreateObject("roArray", files.Count(), true)
-    o = CreateObject("roAssociativeArray")
-    o.ContentType = "episode"
-    o.ShortDescriptionLine1 = "Setup"
-'    o.SDPosterURL = getPosterUrl( dir, url, "Setup", "Setup", "-SD" )
-'    o.HDPosterURL = getPosterUrl( dir, url, "Setup", "Setup", "-HD" )
-    list.Push(o)
-
-    for each f in files
-        print f[0]
-
-        o = CreateObject("roAssociativeArray")
-        o.ContentType = "episode"
-        o.ShortDescriptionLine1 = f[1]["basename"]
-
-        o.SDPosterUrl = getPosterUrl( dir, url, f[1]["basename"], "dir", "-SD" )
-        o.HDPosterUrl = getPosterUrl( dir, url, f[1]["basename"], "dir", "-HD" )
-
-        list.Push(o)
-    end for
-
-    screen.SetContentList(list)
-    screen.SetFocusedListItem(1)
-    screen.Show()
-
-    while true
-        msg = wait(0, screen.GetMessagePort())
-        print msg
-        if msg = invalid or msg.isScreenClosed() then
-            ' UP appears to close the screen, so we get here
-            print "screen closed"
-            return invalid
-        else if msg.isListItemSelected() then
-            if msg.GetIndex() = 0 then
-                checkServerUrl(true)
-            else
-                print "msg: ";msg.GetMessage();" idx: ";msg.GetIndex()
-                return files[msg.GetIndex()-1]
-            end if
-        end if
-    end while
-End Function
-
-'******************************************************
-'** Display a arced-portrait or flat-episodic poster
-'** screen of items
-'** Handle playback of selected video
-'******************************************************
-Function showVideos( screen As Object, files As Object, dir as Object, url as String, episodes As Boolean ) As Object
-    if episodes then
-        screen.SetListStyle("flat-episodic")
-    else
-        screen.SetListStyle("arced-portrait")
-    end if
-
-    streamFormat = { mp4 : "mp4", m4v : "mp4", mov : "mp4",
-                     wmv : "wmv", hls : "hls"
-                   }
-
-    list = CreateObject("roArray", files.Count(), true)
-    for each f in files
-        print f[0]
-        print f[1]
-
-        o = CreateObject("roAssociativeArray")
-        o.ContentType = "movie"
-        o.ShortDescriptionLine1 = f[1]["basename"]
-
-        o.SDPosterUrl = getPosterUrl( dir, url, f[1]["basename"], "dir", "-SD" )
-        o.HDPosterUrl = getPosterUrl( dir, url, f[1]["basename"], "dir", "-HD" )
-
-        if dir.DoesExist(f[1]["basename"]+"-SD.bif") then
-            o.SDBifUrl = url+f[1]["basename"]+"-SD.bif"
-        end if
-        if dir.DoesExist(f[1]["basename"]+"-HD.bif") then
-            o.SDBifUrl = url+f[1]["basename"]+"-HD.bif"
-        end if
-
-        o.IsHD = false
-        o.HDBranded = false
-        o.Description = getDescription(f[1]["basename"], url, dir)
-        o.Rating = "NR"
-        o.StarRating = 100
-        o.Title = f[1]["basename"]
-        o.Length = 0
-
-        ' Video related stuff (can I put this all in the same object?)
-        o.StreamBitrates = [0]
-        o.StreamUrls = [url + f[0]]
-        o.StreamQualities = ["SD"]
-        if streamFormat.DoesExist(f[1]["extension"].Mid(1)) then
-            o.StreamFormat = streamFormat[f[1]["extension"].Mid(1)]
-            print o.StreamFormat
-        else
-            o.StreamFormat = ["mp4"]
-        end if
-
-        list.Push(o)
-    end for
-
-    screen.SetContentList(list)
-    screen.Show()
-
-    while true
-        msg = wait(0, screen.GetMessagePort())
-        print msg
-        if msg = invalid or msg.isScreenClosed() then
-            ' UP appears to close the screen, so we get here
-            print "screen closed"
-            return invalid
-        else if msg.isListItemSelected() then
-            print "msg: ";msg.GetMessage();" idx: ";msg.GetIndex()
-            ' If the selected entry is a directory, return it
-            if (files[msg.GetIndex()][0].Right(1) = "/")
-                return files[msg.GetIndex()]
-            else
-                ' If it is a movie, play it
-                playMovie(list[msg.GetIndex()])
-            end if
-        end if
-    end while
-End Function
-
 
 '******************************************************
 '** Play the video using the data from the movie
