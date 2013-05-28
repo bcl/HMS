@@ -6,7 +6,7 @@
 '******************************************************
 '** Display a scrolling grid of everything on the server
 '******************************************************
-Function displayDirectory( url As String ) As Object
+Function mediaServer( url As String ) As Object
     print "url: ";url
 
     port=CreateObject("roMessagePort")

@@ -6,12 +6,6 @@ Sub Main()
     'initialize theme attributes like titles, logos and overhang color
     initTheme()
 
-    screen = PreShowPosterScreen()
-    if screen = invalid then
-        print "Error creating initial poster screen"
-        return
-    end if
-
     ' Get server url and make sure it is valid
     valid_dir = false
     force_edit = false
@@ -24,7 +18,7 @@ Sub Main()
         end if
     end while
 
-    displayDirectory("http://"+RegRead("ServerURL"))
+    mediaServer("http://"+RegRead("ServerURL"))
 End Sub
 
 
@@ -53,16 +47,4 @@ Sub initTheme()
     app.SetTheme(theme)
 
 End Sub
-
-'*************************************************************
-'** Setup something as a placeholder while we load
-'*************************************************************
-Function preShowPosterScreen() As Object
-    port=CreateObject("roMessagePort")
-    screen = CreateObject("roPosterScreen")
-    screen.SetMessagePort(port)
-    screen.SetListStyle("flat-category")
-    screen.Show()
-    return screen
-End Function
 
