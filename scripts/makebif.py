@@ -1,7 +1,7 @@
 #!/bin/env python
 """
 Create .bif files for Roku video streaming
-Copyright 2009-2011 by Brian C. Lane <bcl@brianlane.com>
+Copyright 2009-2013 by Brian C. Lane <bcl@brianlane.com>
 All Rights Reserved
 
 
@@ -35,7 +35,7 @@ def getMP4Info(filename):
     Get mp4 info about the video
     """
     details = { 'type':"", 'length':0, 'bitrate':1500, 'format':"", 'size':""}
-    cmd = "mp4info %s" % (filename)
+    cmd = ["mp4info", filename]
     p = Popen( cmd, shell=True, stdout=PIPE, stderr=PIPE, stdin=PIPE )
     (stdout, stderr) = p.communicate()
     # Parse the results
@@ -67,9 +67,10 @@ def extractImages( videoFile, directory, interval, mode=0, offset=0 ):
     @param offset offset to first image, in seconds
     """
     size = "x".join([str(i) for i in videoSizes[mode]])
-    cmd = "ffmpeg -i %s -ss %d -r %0.2f -s %s %s/%%08d.jpg" % (videoFile, offset, 1.00/interval, size, directory)
+    cmd = ["ffmpeg", "-i", videoFile, "-ss", "%d" % offset,
+           "-r", "%0.2f" % (1.00/interval), "-s", size, "%s/%%08d.jpg" % directory]
     print cmd
-    p = Popen( cmd, shell=True, stdout=PIPE, stdin=PIPE)
+    p = Popen( cmd, stdout=PIPE, stdin=PIPE)
     (stdout, stderr) = p.communicate()
     print stderr
 
