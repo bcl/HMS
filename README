@@ -5,12 +5,16 @@ by Brian C. Lane <bcl@brianlane.com>
 1. Server Installation
   == REQUIREMENTS ==
 
-  1. A web server that can handle HTTP range requests. Apache and lighttpd are 
-     two examples.
+  A web server that can handle HTTP range requests. Apache and lighttpd are two
+  examples. The server needs to be setup to serve up plain html directory
+  listings. lighttpd works out of the box, Apache needs to have the fancy
+  indexing disabled.
+
+  A Roku player with developer mode.
 
   == Port 80 ==
 
-  Currently most of the Roku player's APIs work with alternate ports. But not all 
+  Currently most of the Roku player's APIs work with alternate ports. But not all
   of them. So it is best if you can run the server on port 80. Under Linux the
   easiest way to do this is to just connect port 80 to port 8888 of the server by
   adding this to your /etc/sysconfig/iptables (or similar) file:
@@ -22,15 +26,14 @@ by Brian C. Lane <bcl@brianlane.com>
   Replace the IP with the IP of the server it is running on. It will direct all 
   port 80 traffic to port 8888.
 
+  Or if you can, just run your webserver on port 80.
+
   == Configuration ==
 
-  (NOTE: Not all of this has been implemented at this time)
-
-  The client software will display directories from the webserver, so make sure
-  that a directory is returned when the url is visited.
-
-  The client software displays the directories on the server, allowing you 
-  to organize your content into categories however you wish.
+  Setup the webserver so that the top level directories are your categories.
+  These names will be displayed as the grid display's category names. The
+  contents of the directories will be displayed as cover images that can be
+  played.
 
   They type of playback for a directory is controlled by an empty file inside
   the directory named:
@@ -40,25 +43,57 @@ by Brian C. Lane <bcl@brianlane.com>
   songs     Play the songs using the song player
   photos    Show the images as a slideshow
 
-  If there is no file it will only display directories.
-
-  In all cases where a directory or movie are displayed if there is a file
-  with the same name but ending in .jpg or .png it will be used as the image
-  for the icon or cover.
-
-  If a directory contains the file 'episodes' the client will use the name of the
-  parent directory as the name of the Show and season. Video in the directory
-  will be shown using the episode selector.
+  (As of Version 3.0 songs and photos are not supported)
 
   Videos should be valid files supported by the Roku (mp4, wmv, mov, m4v)
   If there is a file ending in .txt that will be used for the details page.
 
-  If the filename has -SD or -HD it will be played as a SD or HD video
+  == Cover Images ==
+
+  If the directory has a file named default-SD.png or default-HD.png it will
+  use that image if the video files do not have -SD.png images for them.
+
+  You can add cover images for each video by naming them <video-name>-SD.png
+  -HD.png, -SD.jpg or -HD.jpg
+
+  The first row of the grid is used for the Search and Setup screens. You can
+  set the images for these by placing images in the root directory of the
+  server:
+
+  Search-HD.png  Search-SD.png  Setup-HD.png  Setup-SD.png
+
+  Sample directory listing:
+    Firefly/
+    Home_Movies/
+    Movies/
+    Search-HD.png
+    Search-SD.png
+    Setup-HD.png
+    Setup-SD.png
+
+    ./Firefly:
+    default-SD.png
+    episodes
+    Firefly-S01E01-Serenity.mp4
+    Firefly-S01E01-Serenity-SD.bif
+    Firefly-S01E02-TrainJob.mp4
+    Firefly-S01E02-TrainJob-SD.bif
+
+    ./Movies:
+    101Dalmations.mp4
+    101Dalmations-SD.bif
+    101Dalmations-SD.jpg
+    movies
 
 
 2. Client Installation
 
+  Make sure your Roku is in developer mode, change to the HMS directory and
+  and set the target IP for the install (you can find the IP on the Roku's
+  information screen).
 
+  export ROKU_DEV_TARGET=192.168.101.143
+  make install
 
 
 3. Support/Contribute
