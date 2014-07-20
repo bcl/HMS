@@ -63,7 +63,7 @@ $(APPNAME):
 
 install: $(APPNAME)
 	@echo "Installing $(APPNAME) to host $(ROKU_DEV_TARGET)"
-	@curl -s -S -F "mysubmit=Install" -F "archive=@$(ZIPREL)/$(APPNAME).zip" -F "passwd=" http://$(ROKU_DEV_TARGET)/plugin_install | grep "<font color" | sed "s/<font color=\"red\">//"
+	@curl -s -S -F "mysubmit=Install" -F "archive=@$(ZIPREL)/$(APPNAME).zip" -F "password=" -u $(ROKU_DEV_USER):$(ROKU_DEV_PASSWORD) --anyauth http://$(ROKU_DEV_TARGET)/plugin_install | grep "<font color" | sed "s/<font color=\"red\">//"
 
 pkg: install
 	@echo "*** Creating Package ***"
