@@ -18,7 +18,10 @@ Sub Main()
         end if
     end while
 
-    mediaServer("http://"+RegRead("ServerURL"))
+    ' Check to see if the server supports keystore
+    has_keystore = isUrlValid("http://"+RegRead("ServerURL")+"/keystore/version")
+
+    mediaServer("http://"+RegRead("ServerURL"), has_keystore)
 End Sub
 
 

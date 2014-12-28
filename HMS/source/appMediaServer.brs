@@ -6,8 +6,9 @@
 '******************************************************
 '** Display a scrolling grid of everything on the server
 '******************************************************
-Function mediaServer( url As String ) As Object
+Function mediaServer( url As String, has_keystore As Boolean ) As Object
     print "url: ";url
+    print "has_keystore: "; has_keystore
 
     port=CreateObject("roMessagePort")
     grid = CreateObject("roGridScreen")
@@ -44,7 +45,6 @@ Function mediaServer( url As String ) As Object
 
     ' run the grid
     showTimeBreadcrumb(grid, true)
-    grid.SetFocusedListitem(0, 1)
     grid.Show()
 
     loadingDialog = ShowPleaseWait("Loading Movies...", "")
@@ -81,13 +81,26 @@ Function mediaServer( url As String ) As Object
                 list.Push(MovieObject(displayList[j], cat_url, listing_hash))
             end for
             grid.SetContentList(1+i, list)
+            grid.SetFocusedListitem(1+i, 0)
             screen.Push(list)
+            if has_keystore = true then
+                ' Get the last selected video on this row
+                last_pos = getKeyValue(url, getLastElement(categories[i][0]))
+                if last_pos <> "" and last_pos.toint() < list.Count() then
+                    grid.SetFocusedListitem(1+i, last_pos.toint())
+                end if
+            end if
+            if displayList.Count() = 0 then
+                grid.SetListVisible(1+i, false)
+            end if
         else
             grid.SetContentList(1+i, [])
             screen.Push([])
+            grid.SetListVisible(1+i, false)
         end if
     end for
     loadingDialog.Close()
+    grid.SetFocusedListitem(0, 1)
 
     while true
         msg = wait(30000, port)
@@ -116,7 +129,17 @@ Function mediaServer( url As String ) As Object
                     grid.SetContentList(0, searchRow)
                     grid.SetFocusedListitem(0, 2)
                 else
-                    playMovie(screen[msg.GetIndex()][msg.GetData()])
+                    if has_keystore = true then
+                        setKeyValue(url, getLastElement(categories[msg.GetIndex()-1][0]), tostr(msg.GetData()))
+                    end if
+                    result = playMovie(screen[msg.GetIndex()][msg.GetData()], url, has_keystore)
+                    if result = true and msg.GetData() < screen[msg.GetIndex()].Count() then
+                        ' Advance to the next video and save it
+                        grid.SetFocusedListitem(msg.GetIndex(), msg.GetData()+1)
+                        if has_keystore = true then
+                            setKeyValue(url, getLastElement(categories[msg.GetIndex()-1][0]), tostr(msg.GetData()+1))
+                        end if
+                    end if
                 end if
             endif
         else if msg = invalid then
@@ -249,12 +272,18 @@ End Function
 '*************************************
 '** Get the last position for the movie
 '*************************************
-Function getLastPosition(movie As Object) As Integer
+Function getLastPosition(title As String, url As String, has_keystore As Boolean) As Integer
     ' use movie.Title as the filename
-    lastPos = ReadAsciiFile("tmp:/"+movie.Title)
-    print "Last position of ";movie.Title;" is ";lastPos
-    if lastPos <> "" then
-        return strtoi(lastPos)
+    last_pos = ReadAsciiFile("tmp:/"+title)
+    if last_pos <> "" then
+        return last_pos.toint()
+    end if
+    ' No position stored on local filesystem, query keystore
+    if has_keystore = true then
+        last_pos = getKeyValue(url, title)
+        if last_pos <> "" then
+            return last_pos.toint()
+        end if
     end if
     return 0
 End Function
@@ -285,27 +314,31 @@ End Function
 '** Play the video using the data from the movie
 '** metadata object passed to it
 '******************************************************
-Sub playMovie(movie as Object)
+Sub playMovie(movie As Object, url As String, has_keystore As Boolean) As Boolean
     p = CreateObject("roMessagePort")
     video = CreateObject("roVideoScreen")
     video.setMessagePort(p)
     video.SetPositionNotificationPeriod(15)
 
-    movie.PlayStart = getLastPosition(movie)
+    movie.PlayStart = getLastPosition(movie.Title, url, has_keystore)
     video.SetContent(movie)
     video.show()
 
-    lastPos = 0
+    last_pos = 0
     while true
         msg = wait(0, video.GetMessagePort())
         if type(msg) = "roVideoScreenEvent"
             if msg.isScreenClosed() then 'ScreenClosed event
                 exit while
             else if msg.isPlaybackPosition() then
-                lastPos = msg.GetIndex()
-                WriteAsciiFile("tmp:/"+movie.Title, tostr(lastPos))
+                last_pos = msg.GetIndex()
+                WriteAsciiFile("tmp:/"+movie.Title, tostr(last_pos))
+                if has_keystore = true then
+                    setKeyValue(url, movie.Title, tostr(last_pos))
+                end if
             else if msg.isfullresult() then
                 DeleteFile("tmp:/"+movie.Title)
+                return true
             else if msg.isRequestFailed() then
                 print "play failed: "; msg.GetMessage()
             else
@@ -313,6 +346,8 @@ Sub playMovie(movie as Object)
             end if
         end if
     end while
+
+    return false
 End Sub
 
 '******************************************************

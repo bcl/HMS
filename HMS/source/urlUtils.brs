@@ -47,7 +47,7 @@ Function CreateURLTransferObject2(url As String, contentHeader As String) as Obj
     obj = CreateObject("roUrlTransfer")
     obj.SetPort(CreateObject("roMessagePort"))
     obj.SetUrl(url)
-	obj.AddHeader("Content-Type", contentHeader)
+    obj.AddHeader("Content-Type", contentHeader)
     obj.EnableEncodings(true)
     return obj
 End Function
@@ -144,7 +144,7 @@ Function http_get_to_string_with_retry() as String
             event = wait(timeout%, m.Http.GetPort())
             if type(event) = "roUrlEvent"
                 str = event.GetString()
-                exit while        
+                exit while
             elseif event = invalid
                 m.Http.AsyncCancel()
                 REM reset the connection on timeouts
@@ -199,14 +199,14 @@ Function http_post_from_string_with_timeout(val As String, seconds as Integer) a
     if (m.Http.AsyncPostFromString(val))
         event = wait(timeout%, m.Http.GetPort())
         if type(event) = "roUrlEvent"
-			print "1"
-			str = event.GetString()
+            print "1"
+            str = event.GetString()
         elseif event = invalid
-			print "2"
+            print "2"
             Dbg("AsyncPostFromString timeout")
             m.Http.AsyncCancel()
         else
-			print "3"
+            print "3"
             Dbg("AsyncPostFromString unknown event", event)
         endif
     endif
@@ -238,7 +238,7 @@ Function getHTMLWithTimeout(url As String, seconds As Integer) as Object
             end if
         elseif event = invalid
             Dbg("AsyncGetToString timeout")
-            htp.AsyncCancel()
+            http.AsyncCancel()
         else
             Dbg("AsyncGetToString unknown event", event)
         endif
@@ -250,3 +250,38 @@ Function getHTMLWithTimeout(url As String, seconds As Integer) as Object
     return result
 End Function
 
+' ********************************************************************
+' POST a value to a URL and get the response
+' ********************************************************************
+Function postHTMLWithTimeout(url As String, content As String, seconds As Integer) as Object
+    timeout% = 1000 * seconds
+
+    result = { str : "", error : false, response : 0, reason : "" }
+
+    http = CreateObject("roUrlTransfer")
+    http.SetUrl(url)
+    http.SetPort(CreateObject("roMessagePort"))
+    http.EnableFreshConnection(true) 'Don't reuse existing connections
+    if (http.AsyncPostFromString(content))
+        event = wait(timeout%, http.GetPort())
+        if type(event) = "roUrlEvent"
+            if event.GetResponseCode() = 200 then
+                result.str = event.GetString()
+            else
+                result.error = true
+                result.response = event.GetResponseCode()
+                result.reason = event.GetFailureReason()
+            end if
+        elseif event = invalid
+            Dbg("AsyncGetToString timeout")
+            http.AsyncCancel()
+        else
+            Dbg("AsyncGetToString unknown event", event)
+        endif
+    endif
+
+'    print "HTTP result: "
+'    print result
+
+    return result
+End Function
