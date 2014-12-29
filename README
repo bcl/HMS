@@ -85,6 +85,21 @@ by Brian C. Lane <bcl@brianlane.com>
     101Dalmations-SD.jpg
     movies
 
+  == Keystore ==
+
+  An optional keystore is supported at URL + /keystore/<key>
+
+  If present it will be used to save the last selected video for each row and
+  the last playback position of each video.
+
+  The presence is detected by looking for URL + /keystore/version
+  and values are stored by POST with value=<value>
+
+  You can use my clortho project as the keystore by proxying requests to the
+  /keystore/ prefix to it with lighttpd.
+
+  https://www.brianlane.com/clortho-a-simple-keyvalue-server.html
+
 
 2. Client Installation
 
@@ -92,7 +107,15 @@ by Brian C. Lane <bcl@brianlane.com>
   and set the target IP for the install (you can find the IP on the Roku's
   information screen).
 
+  http://sdkdocs.roku.com/display/sdkdoc/Developer+Guide#DeveloperGuide-71EnablingDevelopmentModeonyourbox
+
   export ROKU_DEV_TARGET=192.168.101.143
+
+  You may also need to set the user and password, if one is set for your device:
+  export ROKU_DEV_USER=rokudev
+  export ROKU_DEV_PASSWORD=password
+
+  And then install the application with:
   make install
 
 
