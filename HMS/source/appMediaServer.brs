@@ -338,6 +338,9 @@ Sub playMovie(movie As Object, url As String, has_keystore As Boolean) As Boolea
                 end if
             else if msg.isfullresult() then
                 DeleteFile("tmp:/"+movie.Title)
+                if has_keystore = true then
+                    setKeyValue(url, movie.Title, "")
+                end if
                 return true
             else if msg.isRequestFailed() then
                 print "play failed: "; msg.GetMessage()
