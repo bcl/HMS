@@ -27,7 +27,7 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
                      end function)
 
     ' Setup Grid with categories
-    titles = CreateObject("roArray", categories.Count(), false)
+    titles = CreateObject("roArray", categories.Count()+1, false)
     titles.Push("Search")
     for i = 0 to categories.Count()-1
         print "Category: :";categories[i][0]
