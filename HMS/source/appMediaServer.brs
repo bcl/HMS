@@ -38,10 +38,11 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
     grid.SetListNames(titles)
 
     ' Hold all the movie objects
-    screen = CreateObject("roArray", categories.Count(), false)
+    screen = CreateObject("roArray", categories.Count()+1, false)
 
     ' Add as utility row
-    grid.SetContentList(0, getUtilRow(url))
+    search = getUtilRow(url)
+    grid.SetContentList(0, search)
     screen.Push(search)
 
     ' run the grid
