@@ -14,6 +14,7 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
     grid = CreateObject("roGridScreen")
     grid.SetMessagePort(port)
     grid.SetDisplayMode("scale-to-fit")
+    grid.SetGridStyle("flat-movie")
 
     ' Build list of Category Names from the top level directories
     listing = getDirectoryListing(url)
@@ -81,14 +82,17 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
                 list.Push(MovieObject(displayList[j], cat_url, listing_hash))
             end for
             grid.SetContentList(1+i, list)
-            grid.SetFocusedListitem(1+i, 0)
             screen.Push(list)
             if has_keystore = true then
                 ' Get the last selected video on this row
                 last_pos = getKeyValue(url, getLastElement(categories[i][0]))
                 if last_pos <> "" and last_pos.toint() < list.Count() then
                     grid.SetFocusedListitem(1+i, last_pos.toint())
+                else
+                    grid.SetFocusedListitem(1+i, 0)
                 end if
+            else
+                grid.SetFocusedListitem(1+i, 0)
             end if
             if displayList.Count() = 0 then
                 grid.SetListVisible(1+i, false)
@@ -107,20 +111,14 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
         if type(msg) = "roGridScreenEvent" then
             if msg.isScreenClosed() then
                 return -1
-            elseif msg.isListItemFocused()
-                print "Focused msg: ";msg.GetMessage();"row: ";msg.GetIndex();
-                print " col: ";msg.GetData()
             elseif msg.isListItemSelected()
-                print "Selected msg: ";msg.GetMessage();"row: ";msg.GetIndex();
-                print " col: ";msg.GetData()
-
                 if msg.GetIndex() = 0 and msg.GetData() = 0 then
                     checkServerUrl(true)
                 else if msg.GetIndex() = 0 and msg.GetData() = 1 then
                     ' search returns a roArray of MovieObjects
                     results = searchScreen(screen)
 
-                    ' Make a new search rot
+                    ' Make a new search row
                     searchRow = getUtilRow(url)
                     searchRow.Append(results)
                     ' Remove the old one and add the new one, selecting first result
@@ -197,27 +195,38 @@ Function MovieObject(file As Object, url As String, listing_hash as Object) As O
     o.ContentType = "movie"
     o.ShortDescriptionLine1 = file[1]["basename"]
 
-    ' Default images
-    o.SDPosterUrl = url+"default-SD.png"
-    o.HDPosterUrl = url+"default-HD.png"
-
     ' Search for SD & HD images and .bif files
     if listing_hash.DoesExist(file[1]["basename"]+"-SD.png") then
         o.SDPosterUrl = url+file[1]["basename"]+"-SD.png"
     else if listing_hash.DoesExist(file[1]["basename"]+"-SD.jpg") then
         o.SDPosterUrl = url+file[1]["basename"]+"-SD.jpg"
-    else if listing_hash.DoesExist(file[1]["basename"]+"-HD.png") then
-        o.HDPosterUrl = url+file[1]["basename"]+"-HD.png"
-    else if listing_hash.DoesExist(file[1]["basename"]+"-HD.jpg") then
-        o.HDPosterUrl = url+file[1]["basename"]+"-HD.jpg"
-    else if listing_hash.DoesExist(file[1]["basename"]+"-SD.bif") then
+    else
+        o.SDPosterUrl = url+"default-SD.png"
+    end if
+
+    o.IsHD = false
+    ' On the Roku 2 (and 3?) if IsHD is false having HDPosterUrl set interferes with
+    ' displaying the correct SDPosterUrl. Disable this for now, since it isn't really
+    ' used at all.
+'    if listing_hash.DoesExist(file[1]["basename"]+"-HD.png") then
+'        o.HDPosterUrl = url+file[1]["basename"]+"-HD.png"
+'    else if listing_hash.DoesExist(file[1]["basename"]+"-HD.jpg") then
+'        o.HDPosterUrl = url+file[1]["basename"]+"-HD.jpg"
+'    else
+'        o.HDPosterUrl = url+"default-HD.png"
+'    end if
+
+    if listing_hash.DoesExist(file[1]["basename"]+"-SD.bif") then
         o.SDBifUrl = url+file[1]["basename"]+"-SD.bif"
-    else if listing_hash.DoesExist(file[1]["basename"]+"-HD.bif") then
+    end if
+    if listing_hash.DoesExist(file[1]["basename"]+"-HD.bif") then
         o.HDBifUrl = url+file[1]["basename"]+"-HD.bif"
-    else if listing_hash.DoesExist(file[1]["basename"]+".txt") then
+    end if
+
+    if listing_hash.DoesExist(file[1]["basename"]+".txt") then
         o.Description = getDescription(url+file[1]["basename"]+".txt")
     end if
-    o.IsHD = false
+
     o.HDBranded = false
     o.Rating = "NR"
     o.StarRating = 100
@@ -359,7 +368,6 @@ End Sub
 '** And if it is missing return ""
 '******************************************************
 Function getDescription(url As String)
-    print "Retrieving description from ";url
     http = CreateObject("roUrlTransfer")
     http.SetUrl(url)
     resp = http.GetToString()
