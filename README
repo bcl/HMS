@@ -62,6 +62,10 @@ by Brian C. Lane <bcl@brianlane.com>
 
   Search-HD.png  Search-SD.png  Setup-HD.png  Setup-SD.png
 
+  IMPORTANT: As of v3.1 /Setup-SD.png is required for HMS to start. If it is
+  missing it will fall into the URL editing dialog.  This is so that you can
+  more easily recover from entering an incorrect URL.
+
   Sample directory listing:
     Firefly/
     Home_Movies/

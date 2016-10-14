@@ -13,7 +13,7 @@ Function checkServerUrl(forceEdit As Boolean) As Boolean
     if (serverUrl = invalid) then
         print "ServerUrl not found in the registry"
         serverUrl = "video.local"
-    else if not forceEdit and isUrlValid(serverUrl) then
+    else if not forceEdit and isUrlValid(serverUrl+"/Setup-SD.png") then
         print "Server set to "; serverUrl
         return true
     end if
