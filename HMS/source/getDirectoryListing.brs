@@ -13,35 +13,20 @@ Function getDirectoryListing(url As String) As Object
 
         return invalid
     end if
-    dir = result.str
 
-    ' Try parsing the html as if it is XML
-    xml=CreateObject("roXMLElement")
-    if not xml.Parse(dir) then
-        title = "Cannot Parse XML"
-        text  = "There was an error parsing the directory listing as XML."
-        print text
-        ShowErrorDialog(text, title)
-
-        return invalid
-    end if
-
-    ' grab all the <a href /> elements
-'    urls = getUrls({}, xml)
-    return getUrls(CreateObject("roArray", 10, true), xml)
-End Function
-
-Function getUrls(array as Object, element as Object) As Object
-    if element.GetName() = "a" and element.HasAttribute("href") then
-'        array.AddReplace(element.GetAttributes()["href"], "")
-        array.Push(element.GetAttributes()["href"])
-    end if
-    if element.GetChildElements()<>invalid then
-        for each e in element.GetChildElements()
-            getUrls(array, e)
-        end for
-    end if
-    return array
+    ' Split it into lines, assume one entry per-line
+    r1 = CreateObject("roRegex", "\n", "")
+    ' Extract the href entry from the line
+    r2 = CreateObject("roRegex", "href=.(.*?).>", "")
+    dir = CreateObject("roArray", 10, true)
+    for each l in r1.Split(result.str)
+        if r2.isMatch(l) then
+            m = r2.Match(l)
+'            print m[1]
+            dir.Push(m[1])
+        end if
+    end for
+    return dir
 End Function
 
 ' ***********************************
