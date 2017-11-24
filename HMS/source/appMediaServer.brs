@@ -88,6 +88,7 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
                         end if
                     end if
                 end if
+                showTimeBreadcrumb(screen, true)
             end if
         else if msg = invalid then
             showTimeBreadcrumb(screen, true)
