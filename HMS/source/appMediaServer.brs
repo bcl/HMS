@@ -81,9 +81,9 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
                 result = playMovie(movies[msg.GetIndex()], url, has_keystore)
                 if result = true and msg.GetIndex() < movies.Count() then
                     ' Advance to the next video and save it
-                    grid.SetFocusedListitem(msg.GetIndex()+1)
+                    screen.SetFocusedListItem(msg.GetIndex()+1)
                     if has_keystore = true then
-                        if msg.GetIndex < movies.Count() then
+                        if msg.GetIndex() < movies.Count() then
                             setKeyValue(url, titles[last_title], tostr(msg.GetIndex()+1))
                         end if
                     end if
@@ -154,17 +154,17 @@ Function MovieObject(file As Object, url As String, listing_hash as Object) As O
     end if
 
     o.IsHD = false
-    ' On the Roku 2 (and 3?) if IsHD is false having HDPosterUrl set interferes with
-    ' displaying the correct SDPosterUrl. Disable this for now, since it isn't really
-    ' used at all.
-'    if listing_hash.DoesExist(file[1]["basename"]+"-HD.png") then
-'        o.HDPosterUrl = url+file[1]["basename"]+"-HD.png"
-'    else if listing_hash.DoesExist(file[1]["basename"]+"-HD.jpg") then
-'        o.HDPosterUrl = url+file[1]["basename"]+"-HD.jpg"
-'    else
-'        o.HDPosterUrl = url+"default-HD.png"
-'    end if
+    ' With the roPosterScreen it always wants to request the HDPosterURL, no matter what IsHD is set to.
+    ' So Fake it out and reuse the -SD images for now.
+    if listing_hash.DoesExist(file[1]["basename"]+"-SD.png") then
+        o.HDPosterUrl = url+file[1]["basename"]+"-SD.png"
+    else if listing_hash.DoesExist(file[1]["basename"]+"-SD.jpg") then
+        o.HDPosterUrl = url+file[1]["basename"]+"-SD.jpg"
+    else
+        o.HDPosterUrl = url+"default-SD.png"
+    end if
 
+    ' Setup the .bif file
     if listing_hash.DoesExist(file[1]["basename"]+"-SD.bif") then
         o.SDBifUrl = url+file[1]["basename"]+"-SD.bif"
     end if
