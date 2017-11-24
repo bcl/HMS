@@ -10,11 +10,11 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
     print "url: ";url
     print "has_keystore: "; has_keystore
 
-    port=CreateObject("roMessagePort")
-    grid = CreateObject("roGridScreen")
-    grid.SetMessagePort(port)
-    grid.SetDisplayMode("scale-to-fit")
-    grid.SetGridStyle("flat-movie")
+    port = CreateObject("roMessagePort")
+    screen = CreateObject("roPosterScreen")
+    screen.SetMessagePort(port)
+    screen.SetListStyle("arced-portrtait")
+    screen.setListDisplayMode("scale-to-fit")
 
     ' Build list of Category Names from the top level directories
     listing = getDirectoryListing(url)
@@ -26,123 +26,71 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
     Sort(categories, function(k)
                        return LCase(k[0])
                      end function)
+    titles = catTitles(categories)
+    screen.SetListNames(titles)
+    max_titles = titles.Count()
 
-    ' Setup Grid with categories
-    titles = CreateObject("roArray", categories.Count()+1, false)
-    titles.Push("Search")
-    for i = 0 to categories.Count()-1
-        print "Category: :";categories[i][0]
-        titles.Push(getLastElement(categories[i][0]))
-    end for
-    grid.SetupLists(titles.Count())
-    grid.SetListNames(titles)
+    screen.SetFocusToFilterBanner(true)
+    last_title = getFocusedItem(url, has_keystore, "filter_pos", max_titles)
+    screen.SetFocusedList(last_title)
+    showTimeBreadcrumb(screen, true)
+    screen.Show()
 
-    ' Hold all the movie objects
-    screen = CreateObject("roArray", categories.Count()+1, false)
+    cache = CreateObject("roAssociativeArray")
 
-    ' Add as utility row
-    search = getUtilRow(url)
-    grid.SetContentList(0, search)
-    screen.Push(search)
-
-    ' run the grid
-    showTimeBreadcrumb(grid, true)
-    grid.Show()
-
-    loadingDialog = ShowPleaseWait("Loading Movies...", "")
-    total = 0
-    ' Setup each category's list
-    for i = 0 to categories.Count()-1
-        cat_url = url + "/" + categories[i][0]
-        listing = getDirectoryListing(cat_url)
-        listing_hash = CreateObject("roAssociativeArray")
-        for each f in listing
-            listing_hash.AddReplace(f, "")
-        end for
-
-        ' What kind of directory is this?
-        dirType = directoryType(listing_hash)
-        if dirType = 1 then
-            displayList  = displayFiles(listing, { jpg : true })
-        else if dirType = 2 then
-            displayList = displayFiles(listing, { mp3 : true })
-        else if dirType = 3 then
-            displayList = displayFiles(listing, { mp4 : true, m4v : true, mov : true, wmv : true } )
-        else if dirType = 4 then
-            displayList = displayFiles(listing, { mp4 : true, m4v : true, mov : true, wmv : true } )
-        end if
-
-        total = total + displayList.Count()
-        loadingDialog.SetTitle("Loading Movie #"+Stri(total))
-        if dirType <> 0 then
-            Sort(displayList, function(k)
-                               return LCase(k[0])
-                             end function)
-            list = CreateObject("roArray", displayList.Count(), false)
-            for j = 0 to displayList.Count()-1
-                list.Push(MovieObject(displayList[j], cat_url, listing_hash))
-            end for
-            grid.SetContentList(1+i, list)
-            screen.Push(list)
-            if has_keystore = true then
-                ' Get the last selected video on this row
-                last_pos = getKeyValue(url, getLastElement(categories[i][0]))
-                if last_pos <> "" and last_pos.toint() < list.Count() then
-                    grid.SetFocusedListitem(1+i, last_pos.toint())
-                else
-                    grid.SetFocusedListitem(1+i, 0)
-                end if
-            else
-                grid.SetFocusedListitem(1+i, 0)
-            end if
-            if displayList.Count() = 0 then
-                grid.SetListVisible(1+i, false)
-            end if
-        else
-            grid.SetContentList(1+i, [])
-            screen.Push([])
-            grid.SetListVisible(1+i, false)
-        end if
-    end for
-    loadingDialog.Close()
-    grid.SetFocusedListitem(0, 1)
+    ' Load the selected title
+    metadata = getCategoryMetadata(url, categories[last_title][0])
+    cache.AddReplace(tostr(last_title), metadata)
+    screen.SetContentList(metadata)
+    screen.SetFocusedListItem(getFocusedItem(url, has_keystore, titles[last_title], metadata.Count()))
 
     while true
         msg = wait(30000, port)
-        if type(msg) = "roGridScreenEvent" then
+        if type(msg) = "roPosterScreenEvent" then
             if msg.isScreenClosed() then
                 return -1
-            elseif msg.isListItemSelected()
-                if msg.GetIndex() = 0 and msg.GetData() = 0 then
+            elseif msg.isListSelected()
+                if msg.GetIndex() = max_titles then
                     checkServerUrl(true)
-                else if msg.GetIndex() = 0 and msg.GetData() = 1 then
-                    ' search returns a roArray of MovieObjects
-                    results = searchScreen(screen)
-
-                    ' Make a new search row
-                    searchRow = getUtilRow(url)
-                    searchRow.Append(results)
-                    ' Remove the old one and add the new one, selecting first result
-                    screen.Shift()
-                    screen.Unshift(searchRow)
-                    grid.SetContentList(0, searchRow)
-                    grid.SetFocusedListitem(0, 2)
                 else
+                    last_title = msg.GetIndex()
+                    print "selected "; titles[last_title]
+
+                    ' Save this as the last selected filter position
                     if has_keystore = true then
-                        setKeyValue(url, getLastElement(categories[msg.GetIndex()-1][0]), tostr(msg.GetData()))
+                        setKeyValue(url, "filter_pos", tostr(msg.GetIndex()))
                     end if
-                    result = playMovie(screen[msg.GetIndex()][msg.GetData()], url, has_keystore)
-                    if result = true and msg.GetData() < screen[msg.GetIndex()].Count() then
-                        ' Advance to the next video and save it
-                        grid.SetFocusedListitem(msg.GetIndex(), msg.GetData()+1)
-                        if has_keystore = true then
-                            setKeyValue(url, getLastElement(categories[msg.GetIndex()-1][0]), tostr(msg.GetData()+1))
+                    screen.SetContentList([])
+
+                    ' Is this cached? If not, clear it and look it up
+                    if not cache.DoesExist(tostr(last_title)) then
+                        metadata = getCategoryMetadata(url, categories[last_title][0])
+                        cache.AddReplace(tostr(last_title), metadata)
+                    else
+                        metadata = cache.Lookup(tostr(last_title))
+                    end if
+                    screen.SetContentList(metadata)
+                    screen.SetFocusedListItem(getFocusedItem(url, has_keystore, titles[last_title], metadata.Count()))
+                end if
+            elseif msg.isListItemSelected()
+                if has_keystore = true then
+                    setKeyValue(url, titles[last_title], tostr(msg.GetIndex()))
+                end if
+                movies = screen.GetContentList()
+                print movies[msg.GetIndex()]
+                result = playMovie(movies[msg.GetIndex()], url, has_keystore)
+                if result = true and msg.GetIndex() < movies.Count() then
+                    ' Advance to the next video and save it
+                    grid.SetFocusedListitem(msg.GetIndex()+1)
+                    if has_keystore = true then
+                        if msg.GetIndex < movies.Count() then
+                            setKeyValue(url, titles[last_title], tostr(msg.GetIndex()+1))
                         end if
                     end if
                 end if
-            endif
+            end if
         else if msg = invalid then
-            showTimeBreadcrumb(grid, true)
+            showTimeBreadcrumb(screen, true)
         endif
     end while
 End Function
@@ -379,3 +327,65 @@ Function getDescription(url As String)
     return ""
 End Function
 
+'******************************************************
+' Return a roArray of just the category names
+'******************************************************
+Function catTitles(categories As Object) As Object
+    titles = CreateObject("roArray", categories.Count()+1, false)
+    for i = 0 to categories.Count()-1
+        titles.Push(getLastElement(categories[i][0]))
+    end for
+    titles.Push("Setup")
+    return titles
+End Function
+
+'*******************************************************************
+' Return a roArray of roAssociativeArrays for the selected category
+'*******************************************************************
+Function getCategoryMetadata(url As String, category As String) As Object
+    cat_url = url + "/" + category
+    listing = getDirectoryListing(cat_url)
+    listing_hash = CreateObject("roAssociativeArray")
+    for each f in listing
+        listing_hash.AddReplace(f, "")
+    end for
+
+    ' What kind of directory is this?
+    dirType = directoryType(listing_hash)
+    if dirType = 1 then
+        displayList  = displayFiles(listing, { jpg : true })
+    else if dirType = 2 then
+        displayList = displayFiles(listing, { mp3 : true })
+    else if dirType = 3 then
+        displayList = displayFiles(listing, { mp4 : true, m4v : true, mov : true, wmv : true } )
+    else if dirType = 4 then
+        displayList = displayFiles(listing, { mp4 : true, m4v : true, mov : true, wmv : true } )
+    end if
+
+    if dirType <> 0 then
+        Sort(displayList, function(k)
+                           return LCase(k[0])
+                         end function)
+        list = CreateObject("roArray", displayList.Count(), false)
+        for j = 0 to displayList.Count()-1
+            list.Push(MovieObject(displayList[j], cat_url, listing_hash))
+        end for
+    end if
+    return list
+End Function
+
+'******************************************************
+' Get the last focused item for a category
+' or return 0 if there is no keystore or an error
+'******************************************************
+Function getFocusedItem(url As String, has_keystore As Boolean, category As String, max_items As Integer) As Integer
+    if has_keystore = true then
+        focus_pos = getKeyValue(url, category)
+        if focus_pos <> "" and focus_pos.toint() < max_items then
+            print "category ";category;" focus is ";focus_pos.toint()
+            return focus_pos.toint()
+        end if
+    end if
+    print "category ";category;" focus is 0"
+    return 0
+End Function
