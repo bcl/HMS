@@ -28,7 +28,7 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
                      end function)
     titles = catTitles(categories)
     screen.SetListNames(titles)
-    max_titles = titles.Count()
+    max_titles = titles.Count()-1
 
     screen.SetFocusToFilterBanner(true)
     last_title = getFocusedItem(url, has_keystore, "filter_pos", max_titles)
@@ -40,10 +40,13 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
 
     ' Load the selected title
     metadata = getCategoryMetadata(url, categories[last_title][0])
-    cache.AddReplace(tostr(last_title), metadata)
-    screen.SetContentList(metadata)
-    screen.SetFocusedListItem(getFocusedItem(url, has_keystore, titles[last_title], metadata.Count()))
+    if metadata.Count() > 0 then
+        cache.AddReplace(tostr(last_title), metadata)
+        screen.SetContentList(metadata)
+        screen.SetFocusedListItem(getFocusedItem(url, has_keystore, titles[last_title], metadata.Count()))
+    end if
 
+    setup_selected = false
     while true
         msg = wait(30000, port)
         if type(msg) = "roPosterScreenEvent" then
@@ -51,8 +54,10 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
                 return -1
             elseif msg.isListSelected()
                 if msg.GetIndex() = max_titles then
-                    checkServerUrl(true)
+                    screen.SetContentList(getSetupRow(url))
+                    setup_selected = true
                 else
+                    setup_selected = false
                     last_title = msg.GetIndex()
                     print "selected "; titles[last_title]
 
@@ -72,6 +77,9 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
                     screen.SetContentList(metadata)
                     screen.SetFocusedListItem(getFocusedItem(url, has_keystore, titles[last_title], metadata.Count()))
                 end if
+            elseif msg.isListItemSelected() and setup_selected = true then
+                checkServerUrl(true)
+                screen.SetFocusToFilterBanner(true)
             elseif msg.isListItemSelected()
                 if has_keystore = true then
                     setKeyValue(url, titles[last_title], tostr(msg.GetIndex()))
@@ -98,26 +106,18 @@ End Function
 
 
 '*************************************
-'** Get the utility row (Setup, Search)
+'** Get the Setup row
 '*************************************
-Function getUtilRow(url As String) As Object
-    ' Setup the Search/Setup entries for first row
-    search = CreateObject("roArray", 2, true)
+Function getSetupRow(url As String) As Object
+    ' Setup the Search
+    setup = CreateObject("roArray", 1, true)
     o = CreateObject("roAssociativeArray")
     o.ContentType = "episode"
     o.Title = "Setup"
     o.SDPosterUrl = url+"/Setup-SD.png"
     o.HDPosterUrl = url+"/Setup-HD.png"
-    search.Push(o)
-
-    o = CreateObject("roAssociativeArray")
-    o.ContentType = "episode"
-    o.Title = "Search"
-    o.SDPosterUrl = url+"/Search-SD.png"
-    o.HDPosterUrl = url+"/Search-HD.png"
-    search.Push(o)
-
-    return search
+    setup.Push(o)
+    return setup
 End Function
 
 '**********************************
