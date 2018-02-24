@@ -361,17 +361,18 @@ Function getCategoryMetadata(url As String, category As String) As Object
         displayList = displayFiles(listing, { mp4 : true, m4v : true, mov : true, wmv : true } )
     else if dirType = 4 then
         displayList = displayFiles(listing, { mp4 : true, m4v : true, mov : true, wmv : true } )
+    else
+        ' Assume movies if there is no type file
+        displayList = displayFiles(listing, { mp4 : true, m4v : true, mov : true, wmv : true } )
     end if
 
-    if dirType <> 0 then
-        Sort(displayList, function(k)
-                           return LCase(k[0])
-                         end function)
-        list = CreateObject("roArray", displayList.Count(), false)
-        for j = 0 to displayList.Count()-1
-            list.Push(MovieObject(displayList[j], cat_url, listing_hash))
-        end for
-    end if
+    Sort(displayList, function(k)
+                       return LCase(k[0])
+                     end function)
+    list = CreateObject("roArray", displayList.Count(), false)
+    for j = 0 to displayList.Count()-1
+        list.Push(MovieObject(displayList[j], cat_url, listing_hash))
+    end for
     return list
 End Function
 
