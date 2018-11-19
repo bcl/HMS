@@ -13,7 +13,7 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
     port = CreateObject("roMessagePort")
     screen = CreateObject("roPosterScreen")
     screen.SetMessagePort(port)
-    screen.SetListStyle("arced-portrtait")
+    screen.SetListStyle("arced-portrait")
     screen.setListDisplayMode("scale-to-fit")
 
     ' Build list of Category Names from the top level directories
