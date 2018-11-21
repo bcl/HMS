@@ -6,7 +6,7 @@
 '******************************************************
 '** Display a scrolling grid of everything on the server
 '******************************************************
-Function mediaServer( url As String, has_keystore As Boolean ) As Object
+Function roPosterMediaServer( url As String, has_keystore As Boolean ) As Object
     print "url: ";url
     print "has_keystore: "; has_keystore
 
@@ -102,6 +102,147 @@ Function mediaServer( url As String, has_keystore As Boolean ) As Object
             showTimeBreadcrumb(screen, true)
         endif
     end while
+End Function
+
+'******************************************************
+'** Display a roGridScreen of the available media
+'******************************************************
+Function roGridMediaServer( url As String, has_keystore As Boolean ) As Object
+    print "url: ";url
+    print "has_keystore: "; has_keystore
+
+    port=CreateObject("roMessagePort")
+    grid = CreateObject("roGridScreen")
+    grid.SetMessagePort(port)
+    grid.SetDisplayMode("scale-to-fit")
+    grid.SetGridStyle("flat-movie")
+
+    categories = getSortedCategoryTitles(url)
+    print categories
+    grid.SetupLists(categories.Count())
+    grid.SetListNames(categories)
+    ' Keep track of which rows have been populated
+    populated_rows = CreateObject("roArray", categories.Count(), false)
+    for i = 0 to categories.Count()-1
+        populated_rows[i] = false
+    end for
+
+    ' Add a utility row (just setup for now)
+    utilityRow = getSetupRow(url)
+    grid.SetContentList(0, utilityRow)
+
+    showTimeBreadcrumb(grid, true)
+    grid.Show()
+
+    grid.SetFocusedListItem(1, 0)
+
+    ' Hold all the movie objects
+    screen = CreateObject("roArray", categories.Count(), false)
+    screen[0] = "unused"
+
+    populated_row = 1
+    play_focused = -1
+    focus_row = -1
+    focus_col = 0
+    last_row = -1
+    while true
+        msg = wait(30000, port)
+        if type(msg) = "roGridScreenEvent" then
+            if msg.isRemoteKeyPressed() and msg.getIndex() = 13 then
+                wasPlayPressed = true
+            else
+                wasPlayPressed = false
+            end if
+
+            if msg.isScreenClosed() then
+                return -1
+            elseif msg.isListItemFocused() then
+                focus_row = msg.getIndex()
+                focus_col = msg.getData()
+
+                print "row, col = "; focus_row, focus_col
+                if focus_row <> last_row then
+                    last_row = focus_row
+
+                    ' Here is where we start fetching things for the next/previous rows and columns
+                    ' focus can skip intermediate rows, need to fill them all in.
+                    for each i in [focus_row, focus_row+1, focus_row+2, focus_row-1]
+                        if i > 0 and i < populated_rows.Count() and populated_rows[i] = false then
+                            grid.SetBreadcrumbText("Loading " + categories[i], "")
+                            metadata = getCategoryMetadata(url, categories[i])
+                            screen[i] = metadata
+                            grid.setContentList(i, metadata)
+                            populated_rows[i] = true
+                            last_col = getFocusedItem(url, has_keystore, categories[i], metadata.Count())
+                            grid.SetListOffset(i, last_col)
+                        end if
+                    end for
+                    showTimeBreadcrumb(grid, true)
+                end if
+            elseif msg.isListItemSelected() or wasPlayPressed then
+                if focus_row = 0 and focus_col = 0 then
+                    checkServerUrl(true)
+                else
+                    print "row, col = "; focus_row, focus_col
+                    if has_keystore = true then
+                        setKeyValue(url, categories[focus_row], tostr(focus_col))
+                    end if
+                    result = playMovie(screen[focus_row][focus_col], url, has_keystore)
+                    if result = true and focus_col < screen[focus_row].Count() then
+                        ' Advance to the next video and save it
+                        grid.SetFocusedListitem(focus_row, focus_col+1)
+                        if has_keystore = true then
+                            setKeyValue(url, categories[focus_row], tostr(focus_col+1))
+                        end if
+                    end if
+                end if
+            else
+                print msg
+            endif
+        else if msg = invalid then
+            showTimeBreadcrumb(grid, true)
+
+            ' If the screen has been idle for 30 seconds go and load an un-populated row
+            for i = 1 to populated_rows.Count()
+                if populated_rows[i] = false then
+                    print "Idle, populating "; categories[i]
+                    grid.SetBreadcrumbText("Loading " + categories[i], "")
+                    metadata = getCategoryMetadata(url, categories[i])
+                    screen[i] = metadata
+                    grid.setContentList(i, metadata)
+                    populated_rows[i] = true
+                    showTimeBreadcrumb(grid, true)
+                    last_col = getFocusedItem(url, has_keystore, categories[i], metadata.Count())
+                    grid.SetListOffset(i, last_col)
+
+                    exit for
+                end if
+            end for
+        end if
+    end while
+End Function
+
+'*************************************
+'** Get the utility row (Setup, Search)
+'*************************************
+Function getUtilRow(url As String) As Object
+    ' Setup the Search/Setup entries for first row
+    search = CreateObject("roArray", 2, true)
+    o = CreateObject("roAssociativeArray")
+    o.ContentType = "episode"
+    o.Title = "Setup"
+    o.SDPosterUrl = url+"/Setup-SD.png"
+    o.HDPosterUrl = url+"/Setup-HD.png"
+    search.Push(o)
+
+    o = CreateObject("roAssociativeArray")
+    o.ContentType = "episode"
+    o.Title = "Search"
+    o.SDPosterUrl = url+"/Search-SD.png"
+    o.HDPosterUrl = url+"/Search-HD.png"
+    search.Push(o)
+
+    return search
 End Function
 
 
@@ -224,7 +365,7 @@ Function showTimeBreadcrumb(screen As Object, use_ampm As Boolean)
     else
         minutes = tostr(minutes)
     end if
-    bc = now.AsDateStringNoParam()+" "+hour+":"+minutes+ampm
+    bc = now.AsDateString("short-month-short-weekday")+" "+hour+":"+minutes+ampm
     screen.SetBreadcrumbText(bc, "")
 End Function
 
@@ -330,21 +471,38 @@ End Function
 
 '******************************************************
 ' Return a roArray of just the category names
+' include the Setup row as the first entry
 '******************************************************
 Function catTitles(categories As Object) As Object
     titles = CreateObject("roArray", categories.Count()+1, false)
+    titles.Push("Setup")
     for i = 0 to categories.Count()-1
         titles.Push(getLastElement(categories[i][0]))
     end for
-    titles.Push("Setup")
     return titles
+End Function
+
+'******************************************************
+'** Get a sorted roArray of category titles
+'******************************************************
+Function getSortedCategoryTitles(url as String) As Object
+     ' Build list of Category Names from the top level directories
+     listing = getDirectoryListing(url)
+     if listing = invalid then
+         return invalid
+     end if
+     categories = displayFiles(listing, {}, true)
+     Sort(categories, function(k)
+                        return LCase(k[0])
+                      end function)
+    return catTitles(categories)
 End Function
 
 '*******************************************************************
 ' Return a roArray of roAssociativeArrays for the selected category
 '*******************************************************************
 Function getCategoryMetadata(url As String, category As String) As Object
-    cat_url = url + "/" + category
+    cat_url = url + "/" + category + "/"
     listing = getDirectoryListing(cat_url)
     listing_hash = CreateObject("roAssociativeArray")
     for each f in listing
