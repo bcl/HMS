@@ -145,9 +145,11 @@ Function roGridMediaServer( url As String, has_keystore As Boolean ) As Object
     focus_row = -1
     focus_col = 0
     last_row = -1
+    idle_timeout = 30000
     while true
-        msg = wait(30000, port)
+        msg = wait(idle_timeout, port)
         if type(msg) = "roGridScreenEvent" then
+            idle_timeout = 30000
             if msg.isRemoteKeyPressed() and msg.getIndex() = 13 then
                 wasPlayPressed = true
             else
@@ -215,6 +217,10 @@ Function roGridMediaServer( url As String, has_keystore As Boolean ) As Object
                     last_col = getFocusedItem(url, has_keystore, categories[i], metadata.Count())
                     grid.SetListOffset(i, last_col)
 
+                    ' Speed up loading while it remains idle
+                    if idle_timeout > 5000 then
+                        idle_timeout = idle_timeout - 5000
+                    end if
                     exit for
                 end if
             end for
