@@ -21,7 +21,9 @@ Sub Main()
     ' Check to see if the server supports keystore
     has_keystore = isUrlValid("http://"+RegRead("ServerURL")+"/keystore/version")
 
-    mediaServer("http://"+RegRead("ServerURL"), has_keystore)
+    roGridMediaServer("http://"+RegRead("ServerURL"), has_keystore)
+' TODO NEED TO FIX SETUP
+'    roPosterMediaServer("http://"+RegRead("ServerURL"), has_keystore)
 End Sub
 
 
