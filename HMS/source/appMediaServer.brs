@@ -13,7 +13,7 @@ Function roPosterMediaServer( url As String, has_keystore As Boolean ) As Object
     port = CreateObject("roMessagePort")
     screen = CreateObject("roPosterScreen")
     screen.SetMessagePort(port)
-    screen.SetListStyle("arced-portrtait")
+    screen.SetListStyle("arced-portrait")
     screen.setListDisplayMode("scale-to-fit")
 
     ' Build list of Category Names from the top level directories
@@ -46,13 +46,19 @@ Function roPosterMediaServer( url As String, has_keystore As Boolean ) As Object
         screen.SetFocusedListItem(getFocusedItem(url, has_keystore, titles[last_title], metadata.Count()))
     end if
 
+    play_focus = -1
     setup_selected = false
     while true
         msg = wait(30000, port)
         if type(msg) = "roPosterScreenEvent" then
+            if msg.isRemoteKeyPressed() and msg.getIndex() = 13 then
+                wasPlayPressed = true
+            else
+                wasPlayPressed = false
+            end if
             if msg.isScreenClosed() then
                 return -1
-            elseif msg.isListSelected()
+            elseif msg.isListSelected() then
                 if msg.GetIndex() = max_titles then
                     screen.SetContentList(getSetupRow(url))
                     setup_selected = true
@@ -80,19 +86,22 @@ Function roPosterMediaServer( url As String, has_keystore As Boolean ) As Object
             elseif msg.isListItemSelected() and setup_selected = true then
                 checkServerUrl(true)
                 screen.SetFocusToFilterBanner(true)
-            elseif msg.isListItemSelected()
+            elseif msg.isListItemFocused() then
+                play_focus = msg.getIndex()
+            elseif msg.isListItemSelected() or wasPlayPressed then
+                print "Focus is on"; play_focus
                 if has_keystore = true then
-                    setKeyValue(url, titles[last_title], tostr(msg.GetIndex()))
+                    setKeyValue(url, titles[last_title], tostr(play_focus))
                 end if
                 movies = screen.GetContentList()
-                print movies[msg.GetIndex()]
-                result = playMovie(movies[msg.GetIndex()], url, has_keystore)
-                if result = true and msg.GetIndex() < movies.Count() then
+                print movies[play_focus]
+                result = playMovie(movies[play_focus], url, has_keystore)
+                if result = true and play_focus < movies.Count() then
                     ' Advance to the next video and save it
-                    screen.SetFocusedListItem(msg.GetIndex()+1)
+                    screen.SetFocusedListItem(play_focus+1)
                     if has_keystore = true then
-                        if msg.GetIndex() < movies.Count() then
-                            setKeyValue(url, titles[last_title], tostr(msg.GetIndex()+1))
+                        if play_focus < movies.Count() then
+                            setKeyValue(url, titles[last_title], tostr(play_focus+1))
                         end if
                     end if
                 end if
