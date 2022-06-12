@@ -4,6 +4,159 @@
 '********************************************************************
 
 '******************************************************
+'** Display a roGridScreen of the available media
+'******************************************************
+Function roGridMediaServer( url As String, has_keystore As Boolean ) As Object
+    print "url: ";url
+    print "has_keystore: "; has_keystore
+
+    port=CreateObject("roMessagePort")
+    grid = CreateObject("roGridScreen")
+    grid.SetMessagePort(port)
+    grid.SetDisplayMode("scale-to-fit")
+    grid.SetGridStyle("flat-movie")
+
+    categories = getSortedCategoryTitles(url)
+    print categories
+    grid.SetupLists(categories.Count())
+    grid.SetListNames(categories)
+    ' Keep track of which rows have been populated
+    populated_rows = CreateObject("roArray", categories.Count(), false)
+    for i = 0 to categories.Count()-1
+        populated_rows[i] = false
+    end for
+
+    ' Add a utility row (just setup for now)
+    utilityRow = getSetupRow(url)
+    grid.SetContentList(0, utilityRow)
+
+    showTimeBreadcrumb(grid, true)
+    grid.Show()
+
+    grid.SetFocusedListItem(1, 0)
+
+    ' Hold all the movie objects
+    screen = CreateObject("roArray", categories.Count(), false)
+    screen[0] = "unused"
+
+    populated_row = 1
+    play_focused = -1
+    focus_row = -1
+    focus_col = 0
+    last_row = -1
+    idle_timeout = 30000
+    while true
+        msg = wait(idle_timeout, port)
+        if type(msg) = "roGridScreenEvent" then
+            idle_timeout = 30000
+
+            ' Only Play to start a video works, none of the others return true
+            wasPlayPressed = false
+            backPressed = false
+            downPressed = false
+            if msg.isRemoteKeyPressed() then
+                print "key = "; msg.GetIndex()
+                if msg.getIndex() = 13 then
+                    wasPlayPressed = true
+                elseif msg.getIndex() = 0 then
+                    backPressed = true
+                elseif msg.getIndex() = 3 then
+                    downPressed = true
+                end if
+            end if
+
+            if msg.isScreenClosed() then
+                return -1
+            elseif msg.isListItemFocused() then
+                focus_row = msg.getIndex()
+                focus_col = msg.getData()
+
+                print "row, col = "; focus_row, focus_col
+                if focus_row <> last_row then
+                    last_row = focus_row
+
+                    ' Here is where we start fetching things for the next/previous rows and columns
+                    ' focus can skip intermediate rows, need to fill them all in.
+                    for each i in [focus_row, focus_row+1, focus_row+2, focus_row-1]
+                        if i > 0 and i < populated_rows.Count() and populated_rows[i] = false then
+                            grid.SetBreadcrumbText("Loading " + categories[i], "")
+                            metadata = getCategoryMetadata(url, categories[i])
+                            screen[i] = metadata
+                            grid.setContentList(i, metadata)
+                            populated_rows[i] = true
+                            last_col = getFocusedItem(url, has_keystore, categories[i], metadata.Count())
+                            grid.SetListOffset(i, last_col)
+                        end if
+                    end for
+                    showTimeBreadcrumb(grid, true)
+                end if
+            elseif msg.isListItemSelected() or wasPlayPressed then
+                if focus_row = 0 and focus_col = 0 then
+                    checkServerUrl(true)
+                elseif focus_row = 0 then
+                    ' Select row to jump to A-Z (1-26)
+                    print "col = "; focus_col
+                    search_chr = Chr(64+focus_col)
+                    ' Find the first category that starts with this letter (case-insensitive)
+                    for i = 1 to categories.Count()-1
+                        first = UCase(Left(categories[i], 1))
+                        if first >= search_chr then
+                            last_col = getFocusedItem(url, has_keystore, categories[i], metadata.Count())
+                            grid.SetFocusedListitem(i, focus_col)
+                            exit for
+                        end if
+                    end for
+                else
+                    print "row, col = "; focus_row, focus_col
+                    if has_keystore = true then
+                        setKeyValue(url, categories[focus_row], tostr(focus_col))
+                    end if
+                    result = playMovie(screen[focus_row][focus_col], url, has_keystore)
+                    if result = true and focus_col < screen[focus_row].Count() then
+                        ' Advance to the next video and save it
+                        grid.SetFocusedListitem(focus_row, focus_col+1)
+                        if has_keystore = true then
+                            setKeyValue(url, categories[focus_row], tostr(focus_col+1))
+                        end if
+                    end if
+                end if
+            elseif wasDownPressed then
+                print "down row = "; focus_row
+                print "last row = "; categories.Count()
+                if focus_row = categories.Count() then
+                    print "need to wrap back to top"
+                end if
+            else
+                print msg
+            endif
+        else if msg = invalid then
+            showTimeBreadcrumb(grid, true)
+
+            ' If the screen has been idle for 30 seconds go and load an un-populated row
+            for i = 1 to populated_rows.Count()
+                if populated_rows[i] = false then
+                    print "Idle, populating "; categories[i]
+                    grid.SetBreadcrumbText("Loading " + categories[i], "")
+                    metadata = getCategoryMetadata(url, categories[i])
+                    screen[i] = metadata
+                    grid.setContentList(i, metadata)
+                    populated_rows[i] = true
+                    showTimeBreadcrumb(grid, true)
+                    last_col = getFocusedItem(url, has_keystore, categories[i], metadata.Count())
+                    grid.SetListOffset(i, last_col)
+
+                    ' Speed up loading while it remains idle
+                    if idle_timeout > 5000 then
+                        idle_timeout = idle_timeout - 5000
+                    end if
+                    exit for
+                end if
+            end for
+        end if
+    end while
+End Function
+
+'******************************************************
 '** Display a scrolling grid of everything on the server
 '******************************************************
 Function roPosterMediaServer( url As String, has_keystore As Boolean ) As Object
@@ -113,130 +266,6 @@ Function roPosterMediaServer( url As String, has_keystore As Boolean ) As Object
     end while
 End Function
 
-'******************************************************
-'** Display a roGridScreen of the available media
-'******************************************************
-Function roGridMediaServer( url As String, has_keystore As Boolean ) As Object
-    print "url: ";url
-    print "has_keystore: "; has_keystore
-
-    port=CreateObject("roMessagePort")
-    grid = CreateObject("roGridScreen")
-    grid.SetMessagePort(port)
-    grid.SetDisplayMode("scale-to-fit")
-    grid.SetGridStyle("flat-movie")
-
-    categories = getSortedCategoryTitles(url)
-    print categories
-    grid.SetupLists(categories.Count())
-    grid.SetListNames(categories)
-    ' Keep track of which rows have been populated
-    populated_rows = CreateObject("roArray", categories.Count(), false)
-    for i = 0 to categories.Count()-1
-        populated_rows[i] = false
-    end for
-
-    ' Add a utility row (just setup for now)
-    utilityRow = getSetupRow(url)
-    grid.SetContentList(0, utilityRow)
-
-    showTimeBreadcrumb(grid, true)
-    grid.Show()
-
-    grid.SetFocusedListItem(1, 0)
-
-    ' Hold all the movie objects
-    screen = CreateObject("roArray", categories.Count(), false)
-    screen[0] = "unused"
-
-    populated_row = 1
-    play_focused = -1
-    focus_row = -1
-    focus_col = 0
-    last_row = -1
-    idle_timeout = 30000
-    while true
-        msg = wait(idle_timeout, port)
-        if type(msg) = "roGridScreenEvent" then
-            idle_timeout = 30000
-            if msg.isRemoteKeyPressed() and msg.getIndex() = 13 then
-                wasPlayPressed = true
-            else
-                wasPlayPressed = false
-            end if
-
-            if msg.isScreenClosed() then
-                return -1
-            elseif msg.isListItemFocused() then
-                focus_row = msg.getIndex()
-                focus_col = msg.getData()
-
-                print "row, col = "; focus_row, focus_col
-                if focus_row <> last_row then
-                    last_row = focus_row
-
-                    ' Here is where we start fetching things for the next/previous rows and columns
-                    ' focus can skip intermediate rows, need to fill them all in.
-                    for each i in [focus_row, focus_row+1, focus_row+2, focus_row-1]
-                        if i > 0 and i < populated_rows.Count() and populated_rows[i] = false then
-                            grid.SetBreadcrumbText("Loading " + categories[i], "")
-                            metadata = getCategoryMetadata(url, categories[i])
-                            screen[i] = metadata
-                            grid.setContentList(i, metadata)
-                            populated_rows[i] = true
-                            last_col = getFocusedItem(url, has_keystore, categories[i], metadata.Count())
-                            grid.SetListOffset(i, last_col)
-                        end if
-                    end for
-                    showTimeBreadcrumb(grid, true)
-                end if
-            elseif msg.isListItemSelected() or wasPlayPressed then
-                if focus_row = 0 and focus_col = 0 then
-                    checkServerUrl(true)
-                else
-                    print "row, col = "; focus_row, focus_col
-                    if has_keystore = true then
-                        setKeyValue(url, categories[focus_row], tostr(focus_col))
-                    end if
-                    result = playMovie(screen[focus_row][focus_col], url, has_keystore)
-                    if result = true and focus_col < screen[focus_row].Count() then
-                        ' Advance to the next video and save it
-                        grid.SetFocusedListitem(focus_row, focus_col+1)
-                        if has_keystore = true then
-                            setKeyValue(url, categories[focus_row], tostr(focus_col+1))
-                        end if
-                    end if
-                end if
-            else
-                print msg
-            endif
-        else if msg = invalid then
-            showTimeBreadcrumb(grid, true)
-
-            ' If the screen has been idle for 30 seconds go and load an un-populated row
-            for i = 1 to populated_rows.Count()
-                if populated_rows[i] = false then
-                    print "Idle, populating "; categories[i]
-                    grid.SetBreadcrumbText("Loading " + categories[i], "")
-                    metadata = getCategoryMetadata(url, categories[i])
-                    screen[i] = metadata
-                    grid.setContentList(i, metadata)
-                    populated_rows[i] = true
-                    showTimeBreadcrumb(grid, true)
-                    last_col = getFocusedItem(url, has_keystore, categories[i], metadata.Count())
-                    grid.SetListOffset(i, last_col)
-
-                    ' Speed up loading while it remains idle
-                    if idle_timeout > 5000 then
-                        idle_timeout = idle_timeout - 5000
-                    end if
-                    exit for
-                end if
-            end for
-        end if
-    end while
-End Function
-
 '*************************************
 '** Get the utility row (Setup, Search)
 '*************************************
@@ -266,13 +295,23 @@ End Function
 '*************************************
 Function getSetupRow(url As String) As Object
     ' Setup the Search
-    setup = CreateObject("roArray", 1, true)
+    setup = CreateObject("roArray", 27, true)
     o = CreateObject("roAssociativeArray")
     o.ContentType = "episode"
     o.Title = "Setup"
     o.SDPosterUrl = url+"/Setup-SD.png"
     o.HDPosterUrl = url+"/Setup-HD.png"
     setup.Push(o)
+
+    ' Add the A-Z posters
+    for i = 0 to 25
+        o = CreateObject("roAssociativeArray")
+        o.ContentType = "episode"
+        o.Title = Chr(Asc("A") + i)
+        o.SDPosterUrl = url+"/.icons/" + Chr(Asc("a") + i) + ".jpg"
+        o.HDPosterUrl = url+"/.icons/" + Chr(Asc("a") + i) + ".jpg"
+        setup.Push(o)
+    end for
     return setup
 End Function
 
@@ -490,7 +529,7 @@ End Function
 '******************************************************
 Function catTitles(categories As Object) As Object
     titles = CreateObject("roArray", categories.Count()+1, false)
-    titles.Push("Setup")
+    titles.Push("Jump To")
     for i = 0 to categories.Count()-1
         titles.Push(getLastElement(categories[i][0]))
     end for
