@@ -22,7 +22,7 @@
 #    Set in your this variable in your shell startup (e.g. .bashrc)
 ##########################################################################  
 APPNAME = HMS
-VERSION = 3.0
-ZIP_EXCLUDE = -x .git\*
+VERSION = 4.0
+ZIP_EXCLUDE = -x .git\* -x \*.pkg -x storeassets\* -x keys\* -x \*/.\*
 
 include ./app.mk
