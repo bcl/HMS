@@ -3,7 +3,7 @@
     <script type="text/brightscript" uri="SetupServerDialog.brs" />
 
     <interface>
-        <field id="serverurl" type="uri" />
+        <field id="serverurl" type="uri" alwaysNotify="true" />
     </interface>
     <children>
     </children>

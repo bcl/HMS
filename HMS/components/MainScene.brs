@@ -8,7 +8,7 @@ sub Init()
 
     url = RegRead("ServerURL")
     if url = invalid then
-        RunSetupServerDialog()
+        RunSetupServerDialog("")
     else
         ' Validate the url
         RunValidateURLTask(url)
@@ -48,17 +48,20 @@ sub OnValidateChanged()
     print m.validateTask.valid
     if not m.validateTask.valid then
         ' Still invalid, run it again
-        RunSetupServerDialog()
+        RunSetupServerDialog(m.validateTask.serverurl)
     else
         ' Valid url, trigger the content load
         m.top.serverurl = m.validateTask.serverurl
+        ' And save it for next time
+        RegWrite("ServerURL", m.validateTask.serverurl)
     end if
 end sub
 
-sub RunSetupServerDialog()
+sub RunSetupServerDialog(url as string)
     print "MainScene->RunSetupServerDialog()"
     m.serverDialog = createObject("roSGNode", "SetupServerDialog")
     m.serverDialog.ObserveField("serverurl", "OnSetupServerURL")
+    m.serverDialog.text = url
     m.top.dialog = m.serverDialog
 end sub
 
