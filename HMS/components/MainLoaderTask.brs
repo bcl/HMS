@@ -11,5 +11,6 @@ end sub
 ' GetContent is executed when  m.contentTask.control = "run" from MainScene
 sub GetContent()
     print "MainLoaderTask->GetContent()"
+    print m.top.serverurl
 
 end sub

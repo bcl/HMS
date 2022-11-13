@@ -3,6 +3,7 @@
     <script type="text/brightscript" uri="MainLoaderTask.brs" />
 
     <interface>
+        <field id="serverurl" type="uri" />
         <field id="content" type="node" />
     </interface>
 </component>
