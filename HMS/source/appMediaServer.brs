@@ -443,28 +443,6 @@ Function getLastPosition(title As String, url As String, has_keystore As Boolean
 End Function
 
 '******************************************************
-'** Return a list of the Videos and directories
-'**
-'** Videos end in the following extensions
-'** .mp4 .m4v .mov .wmv
-'******************************************************
-Function displayFiles( files As Object, fileTypes As Object, dirs=false As Boolean ) As Object
-    list = []
-    for each f in files
-        ' This expects the path to have a system volume at the start
-        p = CreateObject("roPath", "pkg:/" + f)
-        if p.IsValid() and f.Left(1) <> "." then
-            fileType = fileTypes[p.Split().extension.mid(1)]
-            if (dirs and f.Right(1) = "/") or fileType = true then
-                list.push([f, p.Split()])
-            end if
-        end if
-    end for
-
-    return list
-End Function
-
-'******************************************************
 '** Play the video using the data from the movie
 '** metadata object passed to it
 '******************************************************
@@ -521,35 +499,6 @@ Function getDescription(url As String)
         return resp
     end if
     return ""
-End Function
-
-'******************************************************
-' Return a roArray of just the category names
-' include the Setup row as the first entry
-'******************************************************
-Function catTitles(categories As Object) As Object
-    titles = CreateObject("roArray", categories.Count()+1, false)
-    titles.Push("Jump To")
-    for i = 0 to categories.Count()-1
-        titles.Push(getLastElement(categories[i][0]))
-    end for
-    return titles
-End Function
-
-'******************************************************
-'** Get a sorted roArray of category titles
-'******************************************************
-Function getSortedCategoryTitles(url as String) As Object
-     ' Build list of Category Names from the top level directories
-     listing = getDirectoryListing(url)
-     if listing = invalid then
-         return invalid
-     end if
-     categories = displayFiles(listing, {}, true)
-     Sort(categories, function(k)
-                        return LCase(k[0])
-                      end function)
-    return catTitles(categories)
 End Function
 
 '*******************************************************************

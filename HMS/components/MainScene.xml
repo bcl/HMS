@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="MainScene" extends="Scene" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://devtools.web.roku.com/schema/RokuSceneGraph.xsd">
     <script type="text/brightscript" uri="pkg:/source/generalUtils.brs" />
-    <script type="text/brightscript" uri="pkg:/source/urlUtils.brs" />
     <script type="text/brightscript" uri="MainScene.brs" />
 
     <interface>
         <field id="serverurl" type="uri" onChange="RunLoaderTask" />
         <field id="keystore" type="bool" />
+        <field id="categories" type="roArray" />
     </interface>
     <children>
-        <Label text="Hello World!" />
+        <LabelList id="topmenu" />
     </children>
 </component>

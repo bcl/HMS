@@ -21,16 +21,27 @@ sub RunContentTask()
 
     m.contentTask = CreateObject("roSGNode", "MainLoaderTask")
     m.contentTask.serverurl = m.top.serverurl
-    m.contentTask.ObserveField("content", "OnMainContentLoaded")
+    m.contentTask.ObserveField("categories", "OnCategoriesLoaded")
     m.contentTask.control = "run"
 end sub
 
-sub OnMainContentLoaded()
-    print "MainScene->OnMainContentLoaded()"
+sub OnCategoriesLoaded()
+    print "MainScene->OnCategoriesLoaded()"
+    print m.contentTask.categories
+    m.categories = m.contentTask.categories
 
-'    m.GridScreen.SetFocus(true)
-'    m.loadingIndicator.visible = false
-'    m.GridScreen.content = m.contentTask.content
+    ' Add these to the list on the left side of the screen... how?
+    m.topmenu = m.top.FindNode("topmenu")
+    m.topmenu.vertFocusAnimationStyle = "floatingFocus"
+
+    ln = CreateObject("roSGNode", "ContentNode")
+    for each item in m.categories:
+        n = CreateObject("roSGNode", "ContentNode")
+        n.title = item
+        ln.appendChild(n)
+    end for
+    m.topmenu.content = ln
+    m.topmenu.SetFocus(true)
 end sub
 
 sub RunValidateURLTask(url as string)

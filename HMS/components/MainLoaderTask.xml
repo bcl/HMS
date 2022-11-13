@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="MainLoaderTask" extends="Task" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://devtools.web.roku.com/schema/RokuSceneGraph.xsd">
+    <script type="text/brightscript" uri="pkg:/source/generalUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/urlUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/getDirectoryListing.brs" />
     <script type="text/brightscript" uri="MainLoaderTask.brs" />
 
     <interface>
         <field id="serverurl" type="uri" />
-        <field id="content" type="node" />
+        <field id="categories" type="roArray" />
     </interface>
 </component>

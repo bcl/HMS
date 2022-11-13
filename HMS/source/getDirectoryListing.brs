@@ -6,11 +6,10 @@ Function getDirectoryListing(url As String) As Object
     result = getHTMLWithTimeout(url, 60)
 
     if result.error or result.str = invalid then
-        title = "Directory Listing Error"
-        text  = "There was an error fetching the directory listing."
-        print text
-        ShowErrorDialog(text, title)
-
+'        title = "Directory Listing Error"
+'        text  = "There was an error fetching the directory listing."
+'        print text
+'        ShowErrorDialog(text, title)
         return invalid
     end if
 
@@ -32,28 +31,4 @@ Function getDirectoryListing(url As String) As Object
         dir.Push(result.str.Mid(next_href, next_quote-next_href))
         next_href = next_quote + 2
     end while
-End Function
-
-' ***********************************
-' * Get a value for a key
-' ***********************************
-Function getKeyValue(url As String, key As String) As String
-    result = getHTMLWithTimeout(url+"/keystore/"+key, 60)
-    if result.error and result.response <> 404 then
-        print "Error ";result.response;" getting key ";key;": ";result.reason
-        return ""
-    elseif result.error and result.response = 404 then
-        return ""
-    end if
-    return result.str
-End Function
-
-' ***********************************
-' * Set a value for a key
-' ***********************************
-Function setKeyValue(url As String, key As String, value As String)
-    result = postHTMLWithTimeout(url+"/keystore/"+key, "value="+value, 60)
-    if result.error then
-        print "Error ";result.response;" setting key ";key;"=";value;": ";result.reason
-    end if
 End Function
