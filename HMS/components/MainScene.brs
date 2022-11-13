@@ -54,6 +54,7 @@ sub OnValidateChanged()
         m.top.serverurl = m.validateTask.serverurl
         ' And save it for next time
         RegWrite("ServerURL", m.validateTask.serverurl)
+        m.top.keystore = m.validateTask.keystore
     end if
 end sub
 

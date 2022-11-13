@@ -13,9 +13,13 @@ sub ValidateURL()
     print "ValidateURLTask->GetContent()"
     print m.top.serverurl
 
-    m.top.valid = isURLValid(m.top.serverurl)
-    if m.top.valid then
+    valid = isURLValid(m.top.serverurl)
+    if valid then
         print "Is VALID"
+
+        ' See if there is a keystore available
+        m.top.keystore = isUrlValid(m.top.serverurl+"/keystore/version")
+        m.top.valid = valid
     else
         print "Is NOT VALID"
     end if

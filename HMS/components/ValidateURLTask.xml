@@ -5,6 +5,7 @@
 
     <interface>
         <field id="serverurl" type="uri" />
+        <field id="keystore" type="bool" />
         <field id="valid" type="bool" alwaysNotify="true" />
     </interface>
 </component>
