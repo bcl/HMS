@@ -49,12 +49,3 @@ Function checkServerUrl(forceEdit As Boolean) As Boolean
         endif
     end while
 End Function
-
-'************************************************************
-'** Check a URL to see if it is valid
-'************************************************************
-Function isUrlValid( url As String ) As Boolean
-    result = getHTMLWithTimeout(url, 60)
-    return not result.error
-End Function
-

@@ -285,3 +285,11 @@ Function postHTMLWithTimeout(url As String, content As String, seconds As Intege
 
     return result
 End Function
+
+'************************************************************
+'** Check a URL to see if it is valid
+'************************************************************
+Function isUrlValid( url As String ) As Boolean
+    result = getHTMLWithTimeout(url, 60)
+    return not result.error
+End Function
