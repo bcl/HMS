@@ -4,6 +4,8 @@ mm_icon_focus_hd=pkg:/images/MainMenu_Icon_CenterFocus_HD.png
 mm_icon_side_hd=pkg:/images/MainMenu_Icon_Side_HD.png
 mm_icon_focus_sd=pkg:/images/MainMenu_Icon_CenterFocus_SD.png
 mm_icon_side_sd=pkg:/images/MainMenu_Icon_Side_SD.png
-major_version=3
+major_version=4
 minor_version=0
 build_version=00001
+
+ui_resolutions=sd,hd,fhd

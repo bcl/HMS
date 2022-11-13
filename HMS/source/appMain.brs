@@ -2,7 +2,7 @@
 '**  Home Media Server Application - Main
 '**  Copyright (c) 2010-2013 Brian C. Lane All Rights Reserved.
 '********************************************************************
-Sub Main()
+Sub OldMain()
     'initialize theme attributes like titles, logos and overhang color
     initTheme()
 
