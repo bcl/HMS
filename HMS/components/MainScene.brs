@@ -53,6 +53,24 @@ end sub
 sub OnCreateNextPanelIndex()
     print "MainScene->OnCreateNextPanelIndex()"
     print m.listPanel.createNextPanelIndex
+    print m.categories[m.listPanel.createNextPanelIndex]
+    RunCategoryLoadTask(m.categories[m.listPanel.createNextPanelIndex])
+end sub
+
+sub RunCategoryLoadTask(category as string)
+    print "MainScene->RunCategoryLoadTask()"
+    print category
+
+    m.metadataTask = CreateObject("roSGNode", "CategoryLoaderTask")
+    m.metadataTask.serverurl = m.top.serverurl
+    m.metadataTask.category = category
+    m.metadataTask.ObserveField("metadata", "OnMetadataLoaded")
+    m.metadataTask.control = "run"
+end sub
+
+sub OnMetadataLoaded()
+    print "MainScene->OnMetadataLoaded()"
+    print m.metadataTask.metadata
 end sub
 
 sub OnLabelListSelected()

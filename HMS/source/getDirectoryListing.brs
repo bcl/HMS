@@ -32,3 +32,25 @@ Function getDirectoryListing(url As String) As Object
         next_href = next_quote + 2
     end while
 End Function
+
+'******************************************************
+'** Return a list of the Videos and directories
+'**
+'** Videos end in the following extensions
+'** .mp4 .m4v .mov .wmv
+'******************************************************
+Function displayFiles(files As Object, fileTypes As Object, dirs=false As Boolean) As Object
+    list = []
+    for each f in files
+        ' This expects the path to have a system volume at the start
+        p = CreateObject("roPath", "pkg:/" + f)
+        if p.IsValid() and f.Left(1) <> "." then
+            fileType = fileTypes[p.Split().extension.mid(1)]
+            if (dirs and f.Right(1) = "/") or fileType = true then
+                list.push([f, p.Split()])
+            end if
+        end if
+    end for
+
+    return list
+End Function
