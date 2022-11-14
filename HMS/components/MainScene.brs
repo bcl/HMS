@@ -31,8 +31,15 @@ sub OnCategoriesLoaded()
     m.categories = m.contentTask.categories
 
     ' Add these to the list on the left side of the screen... how?
-    m.topmenu = m.top.FindNode("topmenu")
-    m.topmenu.vertFocusAnimationStyle = "floatingFocus"
+    m.panels = m.top.FindNode("panels")
+    m.listPanel = m.panels.CreateChild("ListPanel")
+    m.listPanel.observeField("createNextPanelIndex", "OnCreateNextPanelIndex")
+
+    m.labelList = CreateObject("roSGNode", "LabelList")
+    m.labelList.observeField("focusedItem", "OnLabelListSelected")
+    m.listPanel.list = m.labelList
+    m.listPanel.appendChild(m.labelList)
+    m.listPanel.SetFocus(true)
 
     ln = CreateObject("roSGNode", "ContentNode")
     for each item in m.categories:
@@ -40,8 +47,16 @@ sub OnCategoriesLoaded()
         n.title = item
         ln.appendChild(n)
     end for
-    m.topmenu.content = ln
-    m.topmenu.SetFocus(true)
+    m.labelList.content = ln
+end sub
+
+sub OnCreateNextPanelIndex()
+    print "MainScene->OnCreateNextPanelIndex()"
+    print m.listPanel.createNextPanelIndex
+end sub
+
+sub OnLabelListSelected()
+    print "MainScene->OnLabelListSelected()"
 end sub
 
 sub RunValidateURLTask(url as string)

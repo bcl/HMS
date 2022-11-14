@@ -9,6 +9,6 @@
         <field id="categories" type="roArray" />
     </interface>
     <children>
-        <LabelList id="topmenu" />
+        <PanelSet id="panels" translation="[0, 0]" />
     </children>
 </component>
