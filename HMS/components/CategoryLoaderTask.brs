@@ -14,5 +14,5 @@ sub GetMetadata()
     print m.top.serverurl
     print m.top.category
 
-    m.top.metadata = getCategoryMetadata(m.top.serverurl, m.top.category)
+    m.top.metadata = getCategoryMetadata("http://" + m.top.serverurl, m.top.category)
 end sub

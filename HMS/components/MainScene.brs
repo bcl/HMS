@@ -71,6 +71,28 @@ end sub
 sub OnMetadataLoaded()
     print "MainScene->OnMetadataLoaded()"
     print m.metadataTask.metadata
+
+    ' Totally not sure about this
+    m.gridPanel = m.panels.CreateChild("GridPanel")
+
+    m.posterGrid = CreateObject("roSGNode", "PosterGrid")
+    m.posterGrid.basePosterSize="[240,320]"
+    m.posterGrid.itemSpacing="[8,8]"
+    m.posterGrid.caption1NumLines="1"
+    m.posterGrid.numColumns="3"
+    m.posterGrid.numRows="2"
+'    m.posterGrid.observeField("focusedItem", "OnPosterGridSelected")
+    m.gridPanel.grid = m.posterGrid
+    m.gridPanel.appendChild(m.posterGrid)
+    cn = CreateObject("roSGNode", "ContentNode")
+    for each item in m.metadataTask.metadata
+        n = CreateObject("roSGNode", "ContentNode")
+        n.HDPosterUrl = item.HDPosterUrl
+        n.SDPosterUrl = item.SDPosterUrl
+        n.ShortDescriptionLine1 = item.ShortDescriptionLine1
+        cn.appendChild(n)
+    end for
+    m.posterGrid.content = cn
 end sub
 
 sub OnLabelListSelected()
