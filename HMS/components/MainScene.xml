@@ -10,5 +10,6 @@
     </interface>
     <children>
         <PanelSet id="panels" translation="[0, 0]" />
+        <Video id="player" width="1920" height="1080" visible="false"/>
     </children>
 </component>

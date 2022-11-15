@@ -13,6 +13,8 @@ sub Init()
         ' Validate the url
         RunValidateURLTask(url)
     end if
+
+    SetupVideoPlayer()
 end sub
 
 
@@ -70,8 +72,11 @@ end sub
 
 sub OnMetadataLoaded()
     print "MainScene->OnMetadataLoaded()"
-    print "Got "; m.metadataTask.metadata.Count(); " items."
     m.metadata = m.metadataTask.metadata
+    if m.metadata = invalid then
+        return
+    end if
+    print "Got "; m.metadataTask.metadata.Count(); " items."
 
     ' Create one GridPanel and one PosterGrid, then reuse them for each category
     ' This may not be quite right, but it works for now.
@@ -91,7 +96,7 @@ sub OnMetadataLoaded()
         m.posterGrid.caption1NumLines = "1"
         m.posterGrid.numColumns = "7"
         m.posterGrid.numRows = "3"
-        m.posterGrid.ObserveField("itemSelected", "OnPostedSelected")
+        m.posterGrid.ObserveField("itemSelected", "OnPosterSelected")
         m.posterGrid.ObserveField("itemFocused", "OnPosterFocused")
 
         m.gridPanel.appendChild(m.PosterGrid)
@@ -111,15 +116,32 @@ sub OnMetadataLoaded()
 end sub
 
 sub OnPosterSelected()
-    print "MainScene->OnPosterGridSelected()"
+    print "MainScene->OnPosterSelected()"
     print m.posterGrid.itemSelected
-    print m.metadata[m.posterGrid.itemSelected].ShortDescriptionLine1
+
+    item = m.metadata[m.posterGrid.itemSelected]
+    print item.ShortDescriptionLine1
+
+    content = CreateObject("roSGNode", "ContentNode")
+    content.HDPosterUrl = item.HDPosterUrl
+    content.SDPosterUrl = item.SDPosterUrl
+    content.Title = item.ShortDescriptionLine1
+    ' TODO fix the category metadata
+    content.Url = item.StreamURLS[0]
+
+    ' Play the selected video
+    m.video.content = content
+    m.video.visible = true
+    m.video.SetFocus(true)
+    m.video.control = "play"
 end sub
 
 sub OnPosterFocused()
-    print "MainScene->OnPosterGridSelected()"
+    print "MainScene->OnPosterFocused()"
     print m.posterGrid.itemFocused
     print m.metadata[m.posterGrid.itemFocused].ShortDescriptionLine1
+
+    ' TODO update something at the top with the full name of the video
 end sub
 
 sub OnLabelListSelected()
@@ -165,3 +187,52 @@ sub OnSetupServerURL()
 
     RunValidateURLTask(m.serverDialog.serverurl)
 end sub
+
+sub SetupVideoPlayer()
+    ' Setup the video player
+    m.video = m.top.FindNode("player")
+    m.Video.observeField("state", "OnVideoStateChange")
+    m.Video.observeField("position", "OnVideoPositionChange")
+    m.Video.notificationInterval = 1
+    ' map of events that should be handled on state change
+    m.statesToHandle = {
+        finished: ""
+        error:    ""
+    }
+end sub
+
+sub OnVideoStateChanged()
+    print "MainScene->OnVideoStateChanged()"
+    ? "video state: " + m.Video.state
+    if m.Video.content <> invalid AND m.statesToHandle[m.Video.state] <> invalid
+        m.timer = CreateObject("roSgnode", "Timer")
+        m.timer.observeField("fire", "CloseVideoPlayer")
+        m.timer.duration = 0.3
+        m.timer.control = "start"
+    end if
+end sub
+
+sub CloseVideoPlayer()
+    print "MainScene->CloseVideoPlayer()"
+    m.Video.visible = false
+    m.Video.control = "stop"
+    m.posterGrid.SetFocus(true)
+end sub
+
+sub OnVideoPositionChange()
+    print "MainScene->OnVideoPositionChange()"
+    ' TODO save position to keystore at intervals
+end sub
+
+function onKeyEvent(key as String, press as Boolean) as Boolean
+    if press
+        if key = "back"  'If the back button is pressed
+            if m.Video.visible
+                CloseVideoPlayer()
+                return true
+            else
+                return false
+            end if
+        end if
+    end if
+end Function
