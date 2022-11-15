@@ -70,22 +70,37 @@ end sub
 
 sub OnMetadataLoaded()
     print "MainScene->OnMetadataLoaded()"
-    print m.metadataTask.metadata
+    print "Got "; m.metadataTask.metadata.Count(); " items."
+    m.metadata = m.metadataTask.metadata
 
-    ' Totally not sure about this
-    m.gridPanel = m.panels.CreateChild("GridPanel")
+    ' Create one GridPanel and one PosterGrid, then reuse them for each category
+    ' This may not be quite right, but it works for now.
+    if m.gridPanel = invalid then
+        print "Creating new GridPanel"
+        m.gridPanel = m.panels.CreateChild("GridPanel")
+        m.gridPanel.panelSize = "full"
+        m.gridPanel.isFullScreen = true
+        m.gridPanel.focusable = true
+        m.gridPanel.hasNextPanel = false
+        m.gridPanel.createNextPanelOnItemFocus = false
 
-    m.posterGrid = CreateObject("roSGNode", "PosterGrid")
-    m.posterGrid.basePosterSize="[240,320]"
-    m.posterGrid.itemSpacing="[8,8]"
-    m.posterGrid.caption1NumLines="1"
-    m.posterGrid.numColumns="3"
-    m.posterGrid.numRows="2"
-'    m.posterGrid.observeField("focusedItem", "OnPosterGridSelected")
-    m.gridPanel.grid = m.posterGrid
-    m.gridPanel.appendChild(m.posterGrid)
+        m.posterGrid = CreateObject("roSGNode", "PosterGrid")
+        m.posterGrid.basePosterSize = "[222, 330]"
+        m.posterGrid.itemSpacing = "[6, 9]"
+        m.posterGrid.posterDisplayMode = "scaleToZoom"
+        m.posterGrid.caption1NumLines = "1"
+        m.posterGrid.numColumns = "7"
+        m.posterGrid.numRows = "3"
+        m.posterGrid.ObserveField("itemSelected", "OnPostedSelected")
+        m.posterGrid.ObserveField("itemFocused", "OnPosterFocused")
+
+        m.gridPanel.appendChild(m.PosterGrid)
+        m.gridPanel.grid = m.posterGrid
+        m.listPanel.nextPanel = m.gridPanel
+    end if
+
     cn = CreateObject("roSGNode", "ContentNode")
-    for each item in m.metadataTask.metadata
+    for each item in m.metadata
         n = CreateObject("roSGNode", "ContentNode")
         n.HDPosterUrl = item.HDPosterUrl
         n.SDPosterUrl = item.SDPosterUrl
@@ -93,6 +108,18 @@ sub OnMetadataLoaded()
         cn.appendChild(n)
     end for
     m.posterGrid.content = cn
+end sub
+
+sub OnPosterSelected()
+    print "MainScene->OnPosterGridSelected()"
+    print m.posterGrid.itemSelected
+    print m.metadata[m.posterGrid.itemSelected].ShortDescriptionLine1
+end sub
+
+sub OnPosterFocused()
+    print "MainScene->OnPosterGridSelected()"
+    print m.posterGrid.itemFocused
+    print m.metadata[m.posterGrid.itemFocused].ShortDescriptionLine1
 end sub
 
 sub OnLabelListSelected()
