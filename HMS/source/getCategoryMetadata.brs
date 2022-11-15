@@ -91,9 +91,10 @@ Function MovieObject(file As Object, url As String, listing_hash as Object) As O
         o.HDBifUrl = url+file[1]["basename"]+"-HD.bif"
     end if
 
-    if listing_hash.DoesExist(file[1]["basename"]+".txt") then
-        o.Description = getDescription(url+file[1]["basename"]+".txt")
-    end if
+' NOTE: Cannot easily just read a file in this function
+'    if listing_hash.DoesExist(file[1]["basename"]+".txt") then
+'        o.Description = getDescription(url+file[1]["basename"]+".txt")
+'    end if
 
     o.HDBranded = false
     o.Rating = "NR"
