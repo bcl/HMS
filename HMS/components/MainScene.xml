@@ -10,7 +10,7 @@
     </interface>
     <children>
         <Label id="details" height="88" width="1500" horizAlign="left" translation="[15, 15]" />
-        <Label id="clock" height="88" width="300" horizAlign="right" translation="[1610, 15]" />
+        <Label id="clock" height="88" width="350" horizAlign="right" translation="[1560, 15]" />
         <Timer id="clockTimer" repeat="true" duration="5" />
         <PanelSet id="panels" translation="[-20, 0]" />
         <Video id="player" width="1920" height="1080" visible="false"/>
