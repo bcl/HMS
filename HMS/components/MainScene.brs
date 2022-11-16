@@ -5,6 +5,9 @@
 sub Init()
     print "MainScene->Init()"
     m.top.ObserveField("serverurl", "RunContentTask")
+    m.details = m.top.FindNode("details")
+
+    StartClock()
 
     url = RegRead("ServerURL")
     if url = invalid then
@@ -17,6 +20,38 @@ sub Init()
     SetupVideoPlayer()
 end sub
 
+sub StartClock()
+    m.clock = m.top.FindNode("clock")
+    m.clockTimer = m.top.FindNode("clockTimer")
+    m.clockTimer.ObserveField("fire", "UpdateClock")
+    m.clockTimer.control = "start"
+    UpdateClock()
+end sub
+
+sub UpdateClock()
+    now = CreateObject("roDateTime")
+    now.ToLocalTime()
+    hour = now.GetHours()
+    use_ampm = true
+    if use_ampm then
+        if hour < 12 then
+            ampm = " AM"
+        else
+            ampm = " PM"
+            if hour > 12 then
+                hour = hour - 12
+            end if
+        end if
+    end if
+    hour = tostr(hour)
+    minutes = now.GetMinutes()
+    if minutes < 10 then
+        minutes = "0"+tostr(minutes)
+    else
+        minutes = tostr(minutes)
+    end if
+    m.clock.text = now.GetWeekday()+" "+hour+":"+minutes+ampm
+end sub
 
 sub RunContentTask()
     print "MainScene->RunContentTask()"
@@ -56,6 +91,7 @@ sub OnCreateNextPanelIndex()
     print "MainScene->OnCreateNextPanelIndex()"
     print m.listPanel.createNextPanelIndex
     print m.categories[m.listPanel.createNextPanelIndex]
+    m.details.text = ""
     RunCategoryLoadTask(m.categories[m.listPanel.createNextPanelIndex])
 end sub
 
@@ -118,8 +154,11 @@ end sub
 sub OnPosterSelected()
     print "MainScene->OnPosterSelected()"
     print m.posterGrid.itemSelected
+    StartVideoPlayer(m.posterGrid.itemSelected)
+end sub
 
-    item = m.metadata[m.posterGrid.itemSelected]
+sub StartVideoPlayer(index as integer)
+    item = m.metadata[index]
     print item.ShortDescriptionLine1
 
     content = CreateObject("roSGNode", "ContentNode")
@@ -140,8 +179,7 @@ sub OnPosterFocused()
     print "MainScene->OnPosterFocused()"
     print m.posterGrid.itemFocused
     print m.metadata[m.posterGrid.itemFocused].ShortDescriptionLine1
-
-    ' TODO update something at the top with the full name of the video
+    m.details.text = m.categories[m.listPanel.createNextPanelIndex] + " | " + m.metadata[m.posterGrid.itemFocused].ShortDescriptionLine1
 end sub
 
 sub OnLabelListSelected()
@@ -233,6 +271,8 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
             else
                 return false
             end if
+        else if key = "play"
+            StartVideoPlayer(m.posterGrid.itemFocused)
         end if
     end if
 end Function
