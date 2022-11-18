@@ -270,9 +270,9 @@ end sub
 sub SetupVideoPlayer()
     ' Setup the video player
     m.video = m.top.FindNode("player")
-    m.Video.observeField("state", "OnVideoStateChange")
-    m.Video.observeField("position", "OnVideoPositionChange")
-    m.Video.notificationInterval = 5
+    m.video.observeField("state", "OnVideoStateChange")
+    m.video.observeField("position", "OnVideoPositionChange")
+    m.video.notificationInterval = 5
     ' map of events that should be handled on state change
     m.statesToHandle = {
         finished: ""
@@ -280,9 +280,13 @@ sub SetupVideoPlayer()
     }
 end sub
 
-sub OnVideoStateChanged()
-    print "MainScene->OnVideoStateChanged()"
+sub OnVideoStateChange()
+    print "MainScene->OnVideoStateChange()"
     ? "video state: " + m.Video.state
+    if m.video.state = "finished"
+        ' Set the playback position back to 0 if it played all the way
+        SetKeystoreValue(m.video.content.Title, "0", "ResetKeystoreTask")
+    end if
     if m.Video.content <> invalid AND m.statesToHandle[m.Video.state] <> invalid
         m.timer = CreateObject("roSgnode", "Timer")
         m.timer.observeField("fire", "CloseVideoPlayer")
