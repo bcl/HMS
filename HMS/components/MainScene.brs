@@ -6,6 +6,7 @@ sub Init()
     print "MainScene->Init()"
     m.top.ObserveField("serverurl", "RunContentTask")
     m.details = m.top.FindNode("details")
+    m.keystoreTask = CreateObject("roSGNode", "KeystoreTask")
 
     StartClock()
 
@@ -60,6 +61,33 @@ sub RunContentTask()
     m.contentTask.serverurl = m.top.serverurl
     m.contentTask.ObserveField("categories", "OnCategoriesLoaded")
     m.contentTask.control = "run"
+end sub
+
+sub GetKeystoreValue(key as string, callback as string)
+    m.keystoreTask.serverurl = m.top.serverurl
+    m.keystoreTask.key = key
+    m.keystoreTask.value = ""
+    m.keystoreTask.command = "get"
+    if callback <> ""
+        m.keystoreTask.ObserveField("done", callback)
+    end if
+    m.keystoreTask.control = "run"
+end sub
+
+sub SetKeystoreValue(key as string, value as string, callback as string)
+    m.keystoreTask.serverurl = m.top.serverurl
+    m.keystoreTask.key = key
+    m.keystoreTask.value = value
+    m.keystoreTask.command = "set"
+    if callback <> ""
+        m.keystoreTask.ObserveField("done", callback)
+    end if
+    m.keystoreTask.control = "run"
+end sub
+
+sub ResetKeystoreTask()
+    m.keystoreTask.UNObserveField("done")
+    m.keystoreTask.done = false
 end sub
 
 sub OnCategoriesLoaded()
@@ -167,9 +195,21 @@ sub StartVideoPlayer(index as integer)
     content.Title = item.ShortDescriptionLine1
     ' TODO fix the category metadata
     content.Url = item.StreamURLS[0]
-
-    ' Play the selected video
     m.video.content = content
+
+    GetKeystoreValue(content.Title, "StartPlayback")
+end sub
+
+
+' Called by GetKeystoreValue
+sub StartPlayback()
+    ResetKeystoreTask()
+
+    ' Was there a result?
+    if m.keystoreTask.value <> ""
+        m.video.seek = m.keystoreTask.value.ToInt()
+    end if
+    ' Play the selected video
     m.video.visible = true
     m.video.SetFocus(true)
     m.video.control = "play"
@@ -197,8 +237,9 @@ end sub
 
 sub OnValidateChanged()
     print "MainScene->OnValidateChanged"
-    print m.validateTask.serverurl
-    print m.validateTask.valid
+    print "server url = "; m.validateTask.serverurl
+    print "valid? "; m.validateTask.valid
+    print "keystore? "; m.validateTask.keystore
     if not m.validateTask.valid then
         ' Still invalid, run it again
         RunSetupServerDialog(m.validateTask.serverurl)
@@ -207,7 +248,7 @@ sub OnValidateChanged()
         m.top.serverurl = m.validateTask.serverurl
         ' And save it for next time
         RegWrite("ServerURL", m.validateTask.serverurl)
-        m.top.keystore = m.validateTask.keystore
+        m.keystoreTask.has_keystore = m.validateTask.keystore
     end if
 end sub
 
@@ -231,7 +272,7 @@ sub SetupVideoPlayer()
     m.video = m.top.FindNode("player")
     m.Video.observeField("state", "OnVideoStateChange")
     m.Video.observeField("position", "OnVideoPositionChange")
-    m.Video.notificationInterval = 1
+    m.Video.notificationInterval = 5
     ' map of events that should be handled on state change
     m.statesToHandle = {
         finished: ""
@@ -259,7 +300,11 @@ end sub
 
 sub OnVideoPositionChange()
     print "MainScene->OnVideoPositionChange()"
-    ' TODO save position to keystore at intervals
+    if m.video.positionInfo = invalid
+        return
+    end if
+    print "position = "; m.video.positionInfo.video
+    SetKeystoreValue(m.video.content.Title, m.video.positionInfo.video.ToStr(), "ResetKeystoreTask")
 end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
