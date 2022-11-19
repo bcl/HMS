@@ -37,7 +37,6 @@ End Sub
 '******************************************************
 Sub PrintAnyAA(depth As Integer, aa as Object)
     for each e in aa
-        x = aa[e]
         PrintAny(depth, e + ": ", aa[e])
     next
 End Sub
