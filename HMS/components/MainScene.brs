@@ -186,23 +186,18 @@ sub OnPosterSelected()
 end sub
 
 sub StartVideoPlayer(index as integer)
-    item = m.metadata[index]
-    print item.ShortDescriptionLine1
+    print "MainScene->StartVideoPlayer()"
+    print m.metadata[index].ShortDescriptionLine1
+    m.video.content = m.metadata[index]
 
-    content = CreateObject("roSGNode", "ContentNode")
-    content.HDPosterUrl = item.HDPosterUrl
-    content.SDPosterUrl = item.SDPosterUrl
-    content.Title = item.ShortDescriptionLine1
-    ' TODO fix the category metadata
-    content.Url = item.StreamURLS[0]
-    m.video.content = content
-
-    GetKeystoreValue(content.Title, "StartPlayback")
+    ' Get the previous playback position, if any, and start playing
+    GetKeystoreValue(m.video.content.Title, "StartPlayback")
 end sub
 
 
 ' Called by GetKeystoreValue
 sub StartPlayback()
+    print "MainScene->StartPlayback()"
     ResetKeystoreTask()
 
     ' Was there a result?
@@ -282,12 +277,12 @@ end sub
 
 sub OnVideoStateChange()
     print "MainScene->OnVideoStateChange()"
-    ? "video state: " + m.Video.state
+    ? "video state: " + m.video.state
     if m.video.state = "finished"
         ' Set the playback position back to 0 if it played all the way
         SetKeystoreValue(m.video.content.Title, "0", "ResetKeystoreTask")
     end if
-    if m.Video.content <> invalid AND m.statesToHandle[m.Video.state] <> invalid
+    if m.video.content <> invalid AND m.statesToHandle[m.video.state] <> invalid
         m.timer = CreateObject("roSgnode", "Timer")
         m.timer.observeField("fire", "CloseVideoPlayer")
         m.timer.duration = 0.3
@@ -297,8 +292,8 @@ end sub
 
 sub CloseVideoPlayer()
     print "MainScene->CloseVideoPlayer()"
-    m.Video.visible = false
-    m.Video.control = "stop"
+    m.video.visible = false
+    m.video.control = "stop"
     m.posterGrid.SetFocus(true)
 end sub
 
@@ -314,7 +309,7 @@ end sub
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if press
         if key = "back"  'If the back button is pressed
-            if m.Video.visible
+            if m.video.visible
                 CloseVideoPlayer()
                 return true
             else
