@@ -10,6 +10,7 @@ sub Init()
 
     StartClock()
 
+    ' Get the server URL from the registry or a user dialog
     url = RegRead("ServerURL")
     if url = invalid then
         RunSetupServerDialog("")
@@ -18,9 +19,17 @@ sub Init()
         RunValidateURLTask(url)
     end if
 
+    ' Setup the video player node
     SetupVideoPlayer()
 end sub
 
+
+'****************
+' Clock functions
+'****************
+
+' StartClock starts displaying the clock in the upper right of the screen
+' It calls UpdateClock every 5 seconds
 sub StartClock()
     m.clock = m.top.FindNode("clock")
     m.clockTimer = m.top.FindNode("clockTimer")
@@ -29,6 +38,7 @@ sub StartClock()
     UpdateClock()
 end sub
 
+' Update the clock, showing HH:MM AM/PM in the upper right of the screen
 sub UpdateClock()
     now = CreateObject("roDateTime")
     now.ToLocalTime()
@@ -54,6 +64,14 @@ sub UpdateClock()
     m.clock.text = now.GetWeekday()+" "+hour+":"+minutes+ampm
 end sub
 
+
+'******************
+' Content functions
+'******************
+'
+' RunContentTask is called when the server url has been set from the registry or
+' entered by the user, and verified to be valid.
+' It then starts the task to load the list of categories
 sub RunContentTask()
     print "MainScene->RunContentTask()"
 
@@ -63,45 +81,20 @@ sub RunContentTask()
     m.contentTask.control = "run"
 end sub
 
-sub GetKeystoreValue(key as string, callback as string)
-    m.keystoreTask.serverurl = m.top.serverurl
-    m.keystoreTask.key = key
-    m.keystoreTask.value = ""
-    m.keystoreTask.command = "get"
-    if callback <> ""
-        m.keystoreTask.ObserveField("done", callback)
-    end if
-    m.keystoreTask.control = "run"
-end sub
-
-sub SetKeystoreValue(key as string, value as string, callback as string)
-    m.keystoreTask.serverurl = m.top.serverurl
-    m.keystoreTask.key = key
-    m.keystoreTask.value = value
-    m.keystoreTask.command = "set"
-    if callback <> ""
-        m.keystoreTask.ObserveField("done", callback)
-    end if
-    m.keystoreTask.control = "run"
-end sub
-
-sub ResetKeystoreTask()
-    m.keystoreTask.UNObserveField("done")
-    m.keystoreTask.done = false
-end sub
-
+' OnCategoriesLoaded is called when the list of categories has been recalled
+' from the server. It is returned as a list of strings and is displayed on
+' the left side of the screen.
 sub OnCategoriesLoaded()
     print "MainScene->OnCategoriesLoaded()"
     print m.contentTask.categories
     m.categories = m.contentTask.categories
 
-    ' Add these to the list on the left side of the screen... how?
+    ' Add these to the list on the left side of the screen
     m.panels = m.top.FindNode("panels")
     m.listPanel = m.panels.CreateChild("ListPanel")
     m.listPanel.observeField("createNextPanelIndex", "OnCreateNextPanelIndex")
 
     m.labelList = CreateObject("roSGNode", "LabelList")
-    m.labelList.observeField("focusedItem", "OnLabelListSelected")
     m.listPanel.list = m.labelList
     m.listPanel.appendChild(m.labelList)
     m.listPanel.SetFocus(true)
@@ -115,6 +108,8 @@ sub OnCategoriesLoaded()
     m.labelList.content = ln
 end sub
 
+' OnCreateNextPanelIndex is called when a new category is selected (up/down)
+' It populates the poster grid on the right of the screen
 sub OnCreateNextPanelIndex()
     print "MainScene->OnCreateNextPanelIndex()"
     print m.listPanel.createNextPanelIndex
@@ -123,6 +118,8 @@ sub OnCreateNextPanelIndex()
     RunCategoryLoadTask(m.categories[m.listPanel.createNextPanelIndex])
 end sub
 
+' RunCategoryLoadTask runs a task to get the metadata for the selected category
+' It calls OnMetadataLoaded when it is done
 sub RunCategoryLoadTask(category as string)
     print "MainScene->RunCategoryLoadTask()"
     print category
@@ -134,6 +131,9 @@ sub RunCategoryLoadTask(category as string)
     m.metadataTask.control = "run"
 end sub
 
+' OnMetadataLoaded is called when it has retrieved the metadata for the category
+' It creates one GridPanel and one PosterGrid then re-populates them with each
+' new batch of metadata.
 sub OnMetadataLoaded()
     print "MainScene->OnMetadataLoaded()"
     m.metadata = m.metadataTask.metadata
@@ -179,12 +179,46 @@ sub OnMetadataLoaded()
     m.posterGrid.content = cn
 end sub
 
+' OnPosterSelected it called when OK is hit on the selected poster
+' It starts the video player
 sub OnPosterSelected()
     print "MainScene->OnPosterSelected()"
     print m.posterGrid.itemSelected
     StartVideoPlayer(m.posterGrid.itemSelected)
 end sub
 
+' OnPosterFocused updates the information at the top of the screen with the
+' category name and the name of the selected video
+sub OnPosterFocused()
+    print "MainScene->OnPosterFocused()"
+    print m.posterGrid.itemFocused
+    print m.metadata[m.posterGrid.itemFocused].ShortDescriptionLine1
+    m.details.text = m.categories[m.listPanel.createNextPanelIndex] + " | " + m.metadata[m.posterGrid.itemFocused].ShortDescriptionLine1
+end sub
+
+
+'***********************
+' Video player functions
+'***********************
+
+' SetupVideoPlayer sets up the observers for the video node
+' and how often it will report the playback position
+sub SetupVideoPlayer()
+    ' Setup the video player
+    m.video = m.top.FindNode("player")
+    m.video.observeField("state", "OnVideoStateChange")
+    m.video.observeField("position", "OnVideoPositionChange")
+    m.video.notificationInterval = 5
+    ' map of events that should be handled on state change
+    m.statesToHandle = {
+        finished: ""
+        error:    ""
+    }
+end sub
+
+' StartVideoPlayer is called with the index of the video to play
+' It runs a keystore task to retrieve the last playback position for the
+' selected video and then calls StartPlayback
 sub StartVideoPlayer(index as integer)
     print "MainScene->StartVideoPlayer()"
     print m.metadata[index].ShortDescriptionLine1
@@ -194,8 +228,8 @@ sub StartVideoPlayer(index as integer)
     GetKeystoreValue(m.video.content.Title, "StartPlayback")
 end sub
 
-
-' Called by GetKeystoreValue
+' StartPlayback is called by GetKeystoreValue which may have a starting
+' position. If so, it is set, and playback is started.
 sub StartPlayback()
     print "MainScene->StartPlayback()"
     ResetKeystoreTask()
@@ -210,17 +244,85 @@ sub StartPlayback()
     m.video.control = "play"
 end sub
 
-sub OnPosterFocused()
-    print "MainScene->OnPosterFocused()"
-    print m.posterGrid.itemFocused
-    print m.metadata[m.posterGrid.itemFocused].ShortDescriptionLine1
-    m.details.text = m.categories[m.listPanel.createNextPanelIndex] + " | " + m.metadata[m.posterGrid.itemFocused].ShortDescriptionLine1
+' OnVideoStateChanged is called when the playback is finished or there is an error
+' it will save the last playback position and close the video player
+sub OnVideoStateChange()
+    print "MainScene->OnVideoStateChange()"
+    ? "video state: " + m.video.state
+    if m.video.state = "finished"
+        ' Set the playback position back to 0 if it played all the way
+        SetKeystoreValue(m.video.content.Title, "0", "ResetKeystoreTask")
+    end if
+    if m.video.content <> invalid AND m.statesToHandle[m.video.state] <> invalid
+        m.timer = CreateObject("roSgnode", "Timer")
+        m.timer.observeField("fire", "CloseVideoPlayer")
+        m.timer.duration = 0.3
+        m.timer.control = "start"
+    end if
 end sub
 
-sub OnLabelListSelected()
-    print "MainScene->OnLabelListSelected()"
+' CloseVideoPlayer coses the player and stops playback, returning focus to the
+' poster grid.
+sub CloseVideoPlayer()
+    print "MainScene->CloseVideoPlayer()"
+    m.video.visible = false
+    m.video.control = "stop"
+    m.posterGrid.SetFocus(true)
 end sub
 
+' OnVideoPositionChange is called every 5 seconds and it sends the position
+' to the keystore server
+sub OnVideoPositionChange()
+    print "MainScene->OnVideoPositionChange()"
+    if m.video.positionInfo = invalid
+        return
+    end if
+    print "position = "; m.video.positionInfo.video
+    SetKeystoreValue(m.video.content.Title, m.video.positionInfo.video.ToStr(), "ResetKeystoreTask")
+end sub
+
+' onKeyEvent handles hitting 'back' during playback and play when selecting a poster grid
+' which normally doesn't start playback.
+function onKeyEvent(key as String, press as Boolean) as Boolean
+    if press
+        if key = "back"  'If the back button is pressed
+            if m.video.visible
+                CloseVideoPlayer()
+                return true
+            else
+                return false
+            end if
+        else if key = "play"
+            StartVideoPlayer(m.posterGrid.itemFocused)
+        end if
+    end if
+end Function
+
+
+'***********************
+' Server setup functions
+'***********************
+
+' RunSetupServerDialog runs the dialog prompting the user for the server url
+sub RunSetupServerDialog(url as string)
+    print "MainScene->RunSetupServerDialog()"
+    m.serverDialog = createObject("roSGNode", "SetupServerDialog")
+    m.serverDialog.ObserveField("serverurl", "OnSetupServerURL")
+    m.serverDialog.text = url
+    m.top.dialog = m.serverDialog
+end sub
+
+' OnSetupServerURL is called when the user has entered a url, it then validates it
+' by calling RunValidateURLTask
+sub OnSetupServerURL()
+    print "MainScene->OnSetupServerURL()"
+    print m.serverDialog.serverurl
+
+    RunValidateURLTask(m.serverDialog.serverurl)
+end sub
+
+' RunValidateURLTask is called to validate the url that the user entered in the dialog
+' it starts a task and calls OnValidateChanged when done.
 sub RunValidateURLTask(url as string)
     print "MainScene->RunValidateURLTask()"
 
@@ -230,6 +332,9 @@ sub RunValidateURLTask(url as string)
     m.validateTask.control = "run"
 end sub
 
+' OnValidateChanged checks the result of validating the URL and either runs the setup
+' dialog again, or sets the serverurl which triggers loading the categories and the
+' rest of the screen.
 sub OnValidateChanged()
     print "MainScene->OnValidateChanged"
     print "server url = "; m.validateTask.serverurl
@@ -247,76 +352,43 @@ sub OnValidateChanged()
     end if
 end sub
 
-sub RunSetupServerDialog(url as string)
-    print "MainScene->RunSetupServerDialog()"
-    m.serverDialog = createObject("roSGNode", "SetupServerDialog")
-    m.serverDialog.ObserveField("serverurl", "OnSetupServerURL")
-    m.serverDialog.text = url
-    m.top.dialog = m.serverDialog
-end sub
 
-sub OnSetupServerURL()
-    print "MainScene->OnSetupServerURL()"
-    print m.serverDialog.serverurl
+' ******************
+' Keystore functions
+' ******************
 
-    RunValidateURLTask(m.serverDialog.serverurl)
-end sub
-
-sub SetupVideoPlayer()
-    ' Setup the video player
-    m.video = m.top.FindNode("player")
-    m.video.observeField("state", "OnVideoStateChange")
-    m.video.observeField("position", "OnVideoPositionChange")
-    m.video.notificationInterval = 5
-    ' map of events that should be handled on state change
-    m.statesToHandle = {
-        finished: ""
-        error:    ""
-    }
-end sub
-
-sub OnVideoStateChange()
-    print "MainScene->OnVideoStateChange()"
-    ? "video state: " + m.video.state
-    if m.video.state = "finished"
-        ' Set the playback position back to 0 if it played all the way
-        SetKeystoreValue(m.video.content.Title, "0", "ResetKeystoreTask")
+' GetKeystoreValue retrieves a string from the keystore server
+' It calls the callback when it is done (or has failed)
+' The callback needs to call ResetKeystoreTask to clear the
+' done field.
+sub GetKeystoreValue(key as string, callback as string)
+    m.keystoreTask.serverurl = m.top.serverurl
+    m.keystoreTask.key = key
+    m.keystoreTask.value = ""
+    m.keystoreTask.command = "get"
+    if callback <> ""
+        m.keystoreTask.ObserveField("done", callback)
     end if
-    if m.video.content <> invalid AND m.statesToHandle[m.video.state] <> invalid
-        m.timer = CreateObject("roSgnode", "Timer")
-        m.timer.observeField("fire", "CloseVideoPlayer")
-        m.timer.duration = 0.3
-        m.timer.control = "start"
-    end if
+    m.keystoreTask.control = "run"
 end sub
 
-sub CloseVideoPlayer()
-    print "MainScene->CloseVideoPlayer()"
-    m.video.visible = false
-    m.video.control = "stop"
-    m.posterGrid.SetFocus(true)
+' SetKeystoreValue sets a key to a string on the keystore server
+' It calls the callback when it is done (or has failed)
+' The callback needs to call ResetKeystoreTask to clear the
+' done field.
+sub SetKeystoreValue(key as string, value as string, callback as string)
+    m.keystoreTask.serverurl = m.top.serverurl
+    m.keystoreTask.key = key
+    m.keystoreTask.value = value
+    m.keystoreTask.command = "set"
+    if callback <> ""
+        m.keystoreTask.ObserveField("done", callback)
+    end if
+    m.keystoreTask.control = "run"
 end sub
 
-sub OnVideoPositionChange()
-    print "MainScene->OnVideoPositionChange()"
-    if m.video.positionInfo = invalid
-        return
-    end if
-    print "position = "; m.video.positionInfo.video
-    SetKeystoreValue(m.video.content.Title, m.video.positionInfo.video.ToStr(), "ResetKeystoreTask")
+' ResetKeystoreTask clears the observer and sets done back to false
+sub ResetKeystoreTask()
+    m.keystoreTask.UNObserveField("done")
+    m.keystoreTask.done = false
 end sub
-
-function onKeyEvent(key as String, press as Boolean) as Boolean
-    if press
-        if key = "back"  'If the back button is pressed
-            if m.video.visible
-                CloseVideoPlayer()
-                return true
-            else
-                return false
-            end if
-        else if key = "play"
-            StartVideoPlayer(m.posterGrid.itemFocused)
-        end if
-    end if
-end Function
