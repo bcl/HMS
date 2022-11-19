@@ -55,41 +55,63 @@ Function directoryType(listing_hash As Object) As Integer
     return 0
 End Function
 
+' Get the poster name for the content type
+' First look for a specific .png or .jpg matching the file, then try 'default'
+Function GetPosterURL(listing_hash as Object, url as String, basename as String, content as String) as String
+    if listing_hash.DoesExist(basename+"-"+content+".png") then
+        return url+basename+"-"+content+".png"
+    else if listing_hash.DoesExist(basename+"-"+content+".jpg") then
+        return url+basename+"-"+content+".jpg"
+    else if listing_hash.DoesExist("default-"+content+".png") then
+        return url+"default-"+content+".png"
+    else if listing_hash.DoesExist("default-"+content+".jpg") then
+        return url+"default-"+content+".jpg"
+    end if
+
+    return ""
+End Function
+
+' Get the bif file url for the content type
+Function GetBifURL(listing_hash as Object, url as String, basename as String, content as String) as String
+    if listing_hash.DoesExist(basename+"-"+content+".bif") then
+        return url+basename+"-"+content+".bif"
+    end if
+
+    return ""
+End Function
+
 '******************************************
 '** Create an object with the movie metadata
 '******************************************
 Function MovieObject(file As Object, url As String, listing_hash as Object) As Object
-    o = CreateObject("roAssociativeArray")
+    o = CreateObject("roSGNode", "ContentNode")
     o.ContentType = "movie"
     o.ShortDescriptionLine1 = file[1]["basename"]
 
-    ' Search for SD & HD images and .bif files
-    if listing_hash.DoesExist(file[1]["basename"]+"-SD.png") then
-        o.SDPosterUrl = url+file[1]["basename"]+"-SD.png"
-    else if listing_hash.DoesExist(file[1]["basename"]+"-SD.jpg") then
-        o.SDPosterUrl = url+file[1]["basename"]+"-SD.jpg"
-    else
-        o.SDPosterUrl = url+"default-SD.png"
+' XXX says no field in ContentNode
+'    o.IsHD = false
+
+    ' Assume there is always a SD poster
+    o.SDPosterURL = GetPosterURL(listing_hash, url, file[1]["basename"], "SD")
+
+    ' Fall back to lower existing poster for HD and FHD if they don't exist
+    o.HDPosterURL = GetPosterURL(listing_hash, url, file[1]["basename"], "HD")
+    if o.HDPosterURL = ""
+        o.HDPosterURL = o.SDPosterURL
+    end if
+    o.FHDPosterURL = GetPosterURL(listing_hash, url, file[1]["basename"], "FHD")
+    if o.FHDPosterURL = ""
+        if o.HDPosterURL <> ""
+            o.FHDPosterURL = o.HDPosterURL
+        else
+            o.FHDPosterURL = o.SDPosterURL
+        end if
     end if
 
-    o.IsHD = false
-    ' With the roPosterScreen it always wants to request the HDPosterURL, no matter what IsHD is set to.
-    ' So Fake it out and reuse the -SD images for now.
-    if listing_hash.DoesExist(file[1]["basename"]+"-SD.png") then
-        o.HDPosterUrl = url+file[1]["basename"]+"-SD.png"
-    else if listing_hash.DoesExist(file[1]["basename"]+"-SD.jpg") then
-        o.HDPosterUrl = url+file[1]["basename"]+"-SD.jpg"
-    else
-        o.HDPosterUrl = url+"default-SD.png"
-    end if
-
-    ' Setup the .bif file
-    if listing_hash.DoesExist(file[1]["basename"]+"-SD.bif") then
-        o.SDBifUrl = url+file[1]["basename"]+"-SD.bif"
-    end if
-    if listing_hash.DoesExist(file[1]["basename"]+"-HD.bif") then
-        o.HDBifUrl = url+file[1]["basename"]+"-HD.bif"
-    end if
+    ' Setup the .bif files
+    o.SDBifURL = GetBifURL(listing_hash, url, file[1]["basename"], "SD")
+    o.HDBifURL = GetBifURL(listing_hash, url, file[1]["basename"], "HD")
+    o.FHDBifURL = GetBifURL(listing_hash, url, file[1]["basename"], "FHD")
 
 ' NOTE: Cannot easily just read a file in this function
 '    if listing_hash.DoesExist(file[1]["basename"]+".txt") then
@@ -100,12 +122,7 @@ Function MovieObject(file As Object, url As String, listing_hash as Object) As O
     o.Rating = "NR"
     o.StarRating = 100
     o.Title = file[1]["basename"]
-    o.Length = 0
-
-    ' Video related stuff (can I put this all in the same object?)
-    o.StreamBitrates = [0]
-    o.StreamUrls = [url + file[0]]
-    o.StreamQualities = ["SD"]
+    o.Url = url + file[0]
 
     streamFormat = { mp4 : "mp4", m4v : "mp4", mov : "mp4",
                      wmv : "wmv", hls : "hls"
@@ -113,10 +130,8 @@ Function MovieObject(file As Object, url As String, listing_hash as Object) As O
     if streamFormat.DoesExist(file[1]["extension"].Mid(1)) then
         o.StreamFormat = streamFormat[file[1]["extension"].Mid(1)]
     else
-        o.StreamFormat = ["mp4"]
+        o.StreamFormat = "mp4"
     end if
 
     return o
 End Function
-
-
