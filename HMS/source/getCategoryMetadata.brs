@@ -4,7 +4,12 @@
 '********************************************************************
 
 '*******************************************************************
-' Return a roArray of roAssociativeArrays for the selected category
+' Return a roArray of ContentNodes for the selected category
+' The list is sorted by title, and the ContentNode has the fields
+' setup for direct use with the VideoNode
+'
+' Pass the server url and the category (the subdirectory) to get the
+' metadata from.
 '*******************************************************************
 Function getCategoryMetadata(url As String, category As String) As Object
     cat_url = url + "/" + category + "/"
@@ -39,9 +44,14 @@ Function getCategoryMetadata(url As String, category As String) As Object
     return list
 End Function
 
-'**********************************
-'** Return the type of the directory
-'**********************************
+'*********************************
+' Return the type of the directory
+'
+' 1 = photos
+' 2 = songs
+' 3 = episodes
+' 4 = movies
+'*********************************
 Function directoryType(listing_hash As Object) As Integer
     if listing_hash.DoesExist("photos") then
         return 1
@@ -55,8 +65,18 @@ Function directoryType(listing_hash As Object) As Integer
     return 0
 End Function
 
+'**************************************************************
 ' Get the poster name for the content type
-' First look for a specific .png or .jpg matching the file, then try 'default'
+'
+' First look for a specific .png or .jpg matching the basename,
+' then try 'default'
+'
+' Pass the full listing hash, the server url, basename of the
+' video, and content type. eg. SD, HD, FHD
+'
+' It returns the full url to the poster to use or "" if none
+' are found in the listing.
+'**************************************************************
 Function GetPosterURL(listing_hash as Object, url as String, basename as String, content as String) as String
     if listing_hash.DoesExist(basename+"-"+content+".png") then
         return url+basename+"-"+content+".png"
@@ -71,7 +91,15 @@ Function GetPosterURL(listing_hash as Object, url as String, basename as String,
     return ""
 End Function
 
+'************************************************************
 ' Get the bif file url for the content type
+'
+' Pass the full listing hash, the server url, basename of the
+' video, and content type. eg. SD, HD, FHD
+'
+' It returns the full url to the bif file or "" if none are
+' found in the listing.
+'************************************************************
 Function GetBifURL(listing_hash as Object, url as String, basename as String, content as String) as String
     if listing_hash.DoesExist(basename+"-"+content+".bif") then
         return url+basename+"-"+content+".bif"
@@ -80,9 +108,14 @@ Function GetBifURL(listing_hash as Object, url as String, basename as String, co
     return ""
 End Function
 
-'******************************************
-'** Create an object with the movie metadata
-'******************************************
+'*****************************************************
+' Create an object with the movie metadata
+'
+' Return a ContentNode with all the fields
+' needed for use with the VideoNode setup.
+'
+' Pass the filename, server url, and full listing_hash
+'*****************************************************
 Function MovieObject(file As Object, url As String, listing_hash as Object) As Object
     o = CreateObject("roSGNode", "ContentNode")
     o.ContentType = "movie"

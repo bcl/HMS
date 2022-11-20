@@ -1,6 +1,12 @@
+'********************************************************************
+'**  Home Media Server Application - Directory listing functions
+'**  Copyright (c) 2010 Brian C. Lane All Rights Reserved.
+'********************************************************************
+
 ' ********************************************************************
-' **  Parse an HTML directory listing
-' **  Copyright (c) 2010-2013 Brian C. Lane All Rights Reserved.
+' Parse an HTML directory listing
+'
+' Pass the server url, it returns an array of all the a href paths.
 ' ********************************************************************
 Function getDirectoryListing(url As String) As Object
     result = getHTMLWithTimeout(url, 60)
