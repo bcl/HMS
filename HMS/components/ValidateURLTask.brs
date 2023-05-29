@@ -19,8 +19,8 @@ sub ValidateURL()
 
         ' See if there is a keystore available
         m.top.keystore = isUrlValid(m.top.serverurl+"/keystore/version")
-        m.top.valid = valid
     else
         print "Is NOT VALID"
     end if
+    m.top.valid = valid
 end sub
