@@ -129,8 +129,12 @@ by Brian C. Lane <bcl@brianlane.com>
 3. Debugging
 
 The Roku has a couple of open ports on it for debugging:
+
 * 8085 is the console output from the running app
 * 8080 is the debug server
+
+Port 8080 can be used to examine the loaded plugins, memory usage, or even send
+simulated remote keypresses.
 
 4. Support/Contribute
 
