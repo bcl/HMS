@@ -31,5 +31,3 @@ sub ExecuteCommand()
 
     m.top.done = true
 end sub
-
-

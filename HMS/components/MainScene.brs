@@ -177,6 +177,9 @@ sub OnMetadataLoaded()
         cn.appendChild(n)
     end for
     m.posterGrid.content = cn
+
+    ' Try to get the last selected poster for this category
+    GetKeystoreValue(m.metadataTask.category, "JumpToPoster")
 end sub
 
 ' OnPosterSelected it called when OK is hit on the selected poster
@@ -185,6 +188,9 @@ sub OnPosterSelected()
     print "MainScene->OnPosterSelected()"
     print m.posterGrid.itemSelected
     StartVideoPlayer(m.posterGrid.itemSelected)
+
+    ' Store the new selection for this category
+    SetKeystoreValue(m.metadataTask.category, m.posterGrid.itemSelected.ToStr(), "ResetKeystoreTask")
 end sub
 
 ' OnPosterFocused updates the information at the top of the screen with the
@@ -196,6 +202,24 @@ sub OnPosterFocused()
     m.details.text = m.categories[m.listPanel.createNextPanelIndex] + " | " + m.metadata[m.posterGrid.itemFocused].ShortDescriptionLine1
 end sub
 
+
+' JumpToPoster moves the selection to the last played video if there is one
+sub JumpToPoster()
+    ResetKeystoreTask()
+
+    ' Was there a result?
+    if m.keystoreTask.value <> ""
+        item =  m.keystoreTask.value.ToInt()
+        if item < m.metadata.Count()
+            ' If the animation will be short, animate, otherwise jump
+            if item < 42
+                m.posterGrid.animateToItem = item
+            else
+                m.posterGrid.jumpToItem = item
+            end if
+        end if
+    end if
+end sub
 
 '***********************
 ' Video player functions
