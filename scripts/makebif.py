@@ -13,13 +13,14 @@ NOTE: The jpg image sizes are set to the values posted by bbefilms in the Roku
       development forums. They may or may not be correct for your video aspect ratio.
       They don't look right for me when I set the video height to 480
 """
-import os
-import tempfile
-from subprocess import Popen, PIPE
-import struct
 import array
-import shutil
 from optparse import OptionParser
+import os
+from pathlib import Path
+import shutil
+import struct
+from subprocess import check_output
+import tempfile
 
 # for mode 0, 1, 2, 3
 videoSizes = [(240,180), (320,240), (240,136), (320,180)]
@@ -32,13 +33,13 @@ modeExtension = ['SD', 'HD', 'SD', 'HD']
 def getMP4Info(filename):
     """
     Get mp4 info about the video
+
+    mp4info is in the mp4v2 package
     """
     details = { 'type':"", 'length':0, 'bitrate':1500, 'format':"", 'size':""}
-    cmd = ["mp4info", filename]
-    p = Popen( cmd, shell=True, stdout=PIPE, stderr=PIPE, stdin=PIPE )
-    (stdout, stderr) = p.communicate()
+    output = check_output(["mp4info", filename], text=True)
     # Parse the results
-    for line in stdout.split('\n'):
+    for line in output.split('\n'):
         fields = line.split(None, 2)
         try:
             if fields[1] == 'video':
@@ -69,9 +70,8 @@ def extractImages( videoFile, directory, interval, mode=0, offset=0 ):
     cmd = ["ffmpeg", "-i", videoFile, "-ss", "%d" % offset,
            "-r", "%0.2f" % (1.00/interval), "-s", size, "%s/%%08d.jpg" % directory]
     print(cmd)
-    p = Popen( cmd, stdout=PIPE, stdin=PIPE)
-    (stdout, stderr) = p.communicate()
-    print(stderr)
+    output = check_output(cmd, text=True)
+    print(output)
 
 
 def makeBIF( filename, directory, interval ):
@@ -93,36 +93,33 @@ def makeBIF( filename, directory, interval ):
     images.sort()
     images = images[1:]
 
-    f = open(filename, "wb")
-    array.array('B', magic).tofile(f)
-    f.write(struct.pack("<I1", version))
-    f.write(struct.pack("<I1", len(images)))
-    f.write(struct.pack("<I1", 1000 * interval))
-    array.array('B', [0x00 for x in xrange(20,64)]).tofile(f)
+    with open(filename, "wb") as f:
+        array.array('B', magic).tofile(f)
+        f.write(struct.pack("<I", version))
+        f.write(struct.pack("<I", len(images)))
+        f.write(struct.pack("<I", 1000 * interval))
+        array.array('B', [0x00 for x in range(20,64)]).tofile(f)
 
-    bifTableSize = 8 + (8 * len(images))
-    imageIndex = 64 + bifTableSize
-    timestamp = 0
+        bifTableSize = 8 + (8 * len(images))
+        imageIndex = 64 + bifTableSize
+        timestamp = 0
 
-    # Get the length of each image
-    for image in images:
-        statinfo = os.stat("%s/%s" % (directory, image))
-        f.write(struct.pack("<I1", timestamp))
-        f.write(struct.pack("<I1", imageIndex))
+        # Get the length of each image
+        for image in images:
+            statinfo = os.stat("%s/%s" % (directory, image))
+            f.write(struct.pack("<I", timestamp))
+            f.write(struct.pack("<I", imageIndex))
 
-        timestamp += 1
-        imageIndex += statinfo.st_size
+            timestamp += 1
+            imageIndex += statinfo.st_size
 
-    f.write(struct.pack("<I1", 0xffffffff))
-    f.write(struct.pack("<I1", imageIndex))
+        f.write(struct.pack("<I", 0xffffffff))
+        f.write(struct.pack("<I", imageIndex))
 
-    # Now copy the images
-    for image in images:
-        data = open("%s/%s" % (directory, image), "rb").read()
-        f.write(data)
-
-    f.close()
-
+        # Now copy the images
+        for image in images:
+            data = open("%s/%s" % (directory, image), "rb").read()
+            f.write(data)
 
 def main():
     """
@@ -166,7 +163,11 @@ def main():
     shutil.rmtree(tmpDirectory)
 
     # Move it next to the source
-    shutil.move(bifFile, os.path.dirname(videoFile))
+    dest = Path(os.path.dirname(videoFile))
+    if not os.path.exists(dest / bifFile):
+        shutil.move(bifFile, dest)
+    else:
+        print(f"Not moving {bifFile}, already exists at {dest}")
 
 
 if __name__ == '__main__':
