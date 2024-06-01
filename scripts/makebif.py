@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/local/bin/python3.9
 """
 Create .bif files for Roku video streaming
 Copyright 2009-2013 by Brian C. Lane <bcl@brianlane.com>
@@ -14,7 +14,6 @@ NOTE: The jpg image sizes are set to the values posted by bbefilms in the Roku
       They don't look right for me when I set the video height to 480
 """
 import os
-import sys
 import tempfile
 from subprocess import Popen, PIPE
 import struct
@@ -69,10 +68,10 @@ def extractImages( videoFile, directory, interval, mode=0, offset=0 ):
     size = "x".join([str(i) for i in videoSizes[mode]])
     cmd = ["ffmpeg", "-i", videoFile, "-ss", "%d" % offset,
            "-r", "%0.2f" % (1.00/interval), "-s", size, "%s/%%08d.jpg" % directory]
-    print cmd
+    print(cmd)
     p = Popen( cmd, stdout=PIPE, stdin=PIPE)
     (stdout, stderr) = p.communicate()
-    print stderr
+    print(stderr)
 
 
 def makeBIF( filename, directory, interval ):
@@ -141,7 +140,7 @@ def main():
 
     # Get the video file to operate on
     videoFile = args[0]
-    print "Creating .BIF file for %s" % (videoFile)
+    print("Creating .BIF file for %s" % (videoFile))
 
     # This may be useful for determining the video format
     # Get info about the video file
@@ -165,6 +164,9 @@ def main():
 
     # Clean up the temporary directory
     shutil.rmtree(tmpDirectory)
+
+    # Move it next to the source
+    shutil.move(bifFile, os.path.dirname(videoFile))
 
 
 if __name__ == '__main__':
