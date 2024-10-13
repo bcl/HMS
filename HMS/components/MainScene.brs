@@ -267,8 +267,6 @@ sub StartPlayback()
     m.video.SetFocus(true)
     m.video.control = "play"
 
-    ' Store the new selection for this category
-    ' SetKeystoreValue(m.metadataTask.category, m.posterGrid.itemSelected.ToStr(), "ResetKeystoreTask")
 end sub
 
 ' OnVideoStateChanged is called when the playback is finished or there is an error
@@ -295,6 +293,9 @@ sub CloseVideoPlayer()
     m.video.visible = false
     m.video.control = "stop"
     m.posterGrid.SetFocus(true)
+
+    ' Store the new selection for this category
+     SetKeystoreValue(m.metadataTask.category, m.posterGrid.itemFocused.ToStr(), "ResetKeystoreTask")
 end sub
 
 ' OnVideoPositionChange is called every 5 seconds and it sends the position
