@@ -190,7 +190,7 @@ sub OnPosterSelected()
     StartVideoPlayer(m.posterGrid.itemSelected)
 
     ' Store the new selection for this category
-    SetKeystoreValue(m.metadataTask.category, m.posterGrid.itemSelected.ToStr(), "ResetKeystoreTask")
+    ' SetKeystoreValue(m.metadataTask.category, m.posterGrid.itemSelected.ToStr(), "ResetKeystoreTask")
 end sub
 
 ' OnPosterFocused updates the information at the top of the screen with the
@@ -266,6 +266,9 @@ sub StartPlayback()
     m.video.visible = true
     m.video.SetFocus(true)
     m.video.control = "play"
+
+    ' Store the new selection for this category
+    ' SetKeystoreValue(m.metadataTask.category, m.posterGrid.itemSelected.ToStr(), "ResetKeystoreTask")
 end sub
 
 ' OnVideoStateChanged is called when the playback is finished or there is an error
