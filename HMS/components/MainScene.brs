@@ -260,6 +260,7 @@ sub StartPlayback()
 
     ' Was there a result?
     if m.keystoreTask.value <> ""
+        print "Seeking to "; m.keystoreTask.value.ToInt()
         m.video.seek = m.keystoreTask.value.ToInt()
     end if
     ' Play the selected video

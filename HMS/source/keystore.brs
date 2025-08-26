@@ -15,11 +15,14 @@ Function getKeyValue(url As String, key As String) As String
     elseif result.error and result.response = 404 then
         return ""
     end if
-    return result.str
+
+    ' The keyserver returns 'value=XXXX', strip off the value= if present
+    return result.str.Replace("value=","")
 End Function
 
 ' ***********************************
 ' * Set a value for a key
+' For historical reasons the actual value stored includes the string 'value=' at the start.
 ' ***********************************
 Function setKeyValue(url As String, key As String, value As String)
     result = postHTMLWithTimeout(url+"/keystore/"+key, "value="+value, 60)
