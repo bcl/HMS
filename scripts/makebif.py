@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.9
+#!/usr/local/bin/python3.12
 """
 Create .bif files for Roku video streaming
 Copyright 2009-2013 by Brian C. Lane <bcl@brianlane.com>
